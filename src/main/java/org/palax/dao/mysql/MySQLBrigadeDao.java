@@ -1,0 +1,277 @@
+package org.palax.dao.mysql;
+
+import org.apache.log4j.Logger;
+import org.palax.dao.BrigadeDao;
+import org.palax.entity.Brigade;
+import org.palax.entity.WorkType;
+import org.palax.utils.DataSourceManager;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * The {@code MySQLBrigadeDao} singleton class implements {@link BrigadeDao} and specified for MySQL DB
+ *
+ * @author Taras Palashynskyy
+ */
+
+public class MySQLBrigadeDao implements BrigadeDao {
+    /**Object for logging represent by {@link Logger}. */
+    private static final Logger logger = Logger.getLogger(MySQLBrigadeDao.class);
+
+    /**Singleton object which is returned when you try to create a new instance */
+    private static MySQLBrigadeDao mySQLBrigadeDao;
+    /**Values which store column id for {@link ResultSet} */
+    private static final int BRIGADE_ID = 1;
+    private static final int BRIGADE_NAME = 2;
+    private static final int WORK_TYPE_ID = 3;
+    private static final int TYPE_NAME = 4;
+
+    private MySQLBrigadeDao() {
+
+    }
+
+    /**
+     * Always return same {@link MySQLBrigadeDao} instance
+     *
+     * @return always return same {@link MySQLBrigadeDao} instance
+     */
+    public synchronized static MySQLBrigadeDao getInstance() {
+        if(mySQLBrigadeDao == null) {
+            mySQLBrigadeDao = new MySQLBrigadeDao();
+            logger.debug("Create first MySQLBrigadeDao instance");
+        }
+        logger.debug("Return MySQLBrigadeDao instance");
+        return mySQLBrigadeDao;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Brigade> getAllBrigade() {
+        String SQL = "SELECT A.BRIGADE_ID, A.BRIGADE_NAME, A.WORK_TYPE_ID, B.TYPE_NAME " +
+                "FROM housing_service.brigade A " +
+                "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID)";
+
+        List<Brigade> brigadeList = null;
+
+        logger.debug("Try get all BRIGADE");
+
+        Connection con = DataSourceManager.getConnection();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement(SQL);
+            rs = stm.executeQuery();
+
+            brigadeList = parseResultSet(rs);
+
+            logger.debug("Get all BRIGADE successfully " + brigadeList);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        } finally {
+            DataSourceManager.closeAll(con, stm, rs);
+        }
+
+        return brigadeList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Brigade> getAllBrigadeByWorkType(String workType) {
+        String SQL = "SELECT A.BRIGADE_ID, A.BRIGADE_NAME, A.WORK_TYPE_ID, B.TYPE_NAME " +
+                "FROM housing_service.brigade A " +
+                "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
+                "WHERE B.TYPE_NAME=?";
+
+        List<Brigade> brigadeList = null;
+
+        logger.debug("Try get BRIGADE by WORK_TYPE " + workType);
+
+        Connection con = DataSourceManager.getConnection();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement(SQL);
+            stm.setString(1, workType);
+            rs = stm.executeQuery();
+
+            brigadeList = parseResultSet(rs);
+
+            logger.debug("Get BRIGADE by WORK_TYPE successfully " + brigadeList);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        } finally {
+            DataSourceManager.closeAll(con, stm, rs);
+        }
+
+        return brigadeList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Brigade getBrigadeById(Long id) {
+        String SQL = "SELECT A.BRIGADE_ID, A.BRIGADE_NAME, A.WORK_TYPE_ID, B.TYPE_NAME\n" +
+                "FROM housing_service.brigade A\n" +
+                "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
+                "WHERE A.BRIGADE_ID=?";
+
+        Brigade brigade = null;
+
+        logger.debug("Try get BRIGADE by ID " + id);
+
+        Connection con = DataSourceManager.getConnection();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement(SQL);
+            stm.setLong(1, id);
+            rs = stm.executeQuery();
+
+            brigade = parseResultSet(rs).get(0);
+
+            logger.debug("Get BRIGADE by ID successfully " + brigade);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        } finally {
+            DataSourceManager.closeAll(con, stm, rs);
+        }
+
+        return brigade;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean deleteBrigade(Brigade brigade) {
+        String SQL = "DELETE FROM housing_service.brigade WHERE BRIGADE_ID=?";
+
+        logger.debug("Try delete BRIGADE " + brigade);
+
+        Connection con = DataSourceManager.getConnection();
+        PreparedStatement stm = null;
+        try {
+            stm = con.prepareStatement(SQL);
+            stm.setLong(1, brigade.getBrigadeId());
+            if(stm.executeUpdate() > 0) {
+                logger.debug("BRIGADE delete successfully " + brigade);
+                return true;
+            }
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        } finally {
+            DataSourceManager.closeAll(con, stm, null);
+        }
+        logger.debug("BRIGADE delete fail " + brigade);
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean updateBrigade(Brigade brigade) {
+        String SQL = "UPDATE housing_service.brigade SET BRIGADE_NAME=?, WORK_TYPE_ID=? WHERE BRIGADE_ID=?";
+
+        logger.debug("Try update BRIGADE " + brigade);
+
+        Connection con = DataSourceManager.getConnection();
+        PreparedStatement stm = null;
+        try {
+            stm = con.prepareStatement(SQL);
+            stm.setString(1, brigade.getBrigadeName());
+            Long workTypeId = brigade.getWorkType() != null ? brigade.getWorkType().getWorkTypeId() : null;
+            if(workTypeId == null)
+                stm.setNull(2,Types.INTEGER);
+            else
+                stm.setLong(2, workTypeId);
+            stm.setLong(3, brigade.getBrigadeId());
+            if(stm.executeUpdate() > 0) {
+                logger.debug("BRIGADE update successfully " + brigade);
+                return true;
+            }
+        } catch (SQLIntegrityConstraintViolationException e) {
+            logger.info("Threw a SQLIntegrityConstraintViolationException, try update new BRIGADE " + brigade);
+            logger.debug("Threw a SQLIntegrityConstraintViolationException, full stack trace follows:",e);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        } finally {
+            DataSourceManager.closeAll(con, stm, null);
+        }
+        logger.debug("BRIGADE update fail " + brigade);
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean insertBrigade(Brigade brigade) {
+        String SQL = "INSERT INTO housing_service.brigade (BRIGADE_NAME, WORK_TYPE_ID)  " +
+                "VALUES (?, ?)";
+
+        logger.debug("Try insert BRIGADE " + brigade);
+
+        Connection con = DataSourceManager.getConnection();
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+        try {
+            stm = con.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
+            stm.setString(1, brigade.getBrigadeName());
+            Long workTypeId = brigade.getWorkType() != null ? brigade.getWorkType().getWorkTypeId() : null;
+            if(workTypeId == null)
+                stm.setNull(2,Types.INTEGER);
+            else
+                stm.setLong(2, workTypeId);
+            if(stm.executeUpdate() > 0) {
+                rs = stm.getGeneratedKeys();
+                if(rs.next()) {
+                    brigade.setBrigadeId(rs.getLong(1));
+                    logger.debug("BRIGADE insert successfuly " + brigade);
+                    return true;
+                }
+            }
+        } catch (SQLIntegrityConstraintViolationException e) {
+            logger.info("Threw a SQLIntegrityConstraintViolationException, try create new BRIGADE " + brigade);
+            logger.debug("Threw a SQLIntegrityConstraintViolationException, full stack trace follows:",e);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        } finally {
+            DataSourceManager.closeAll(con, stm, null);
+        }
+        logger.debug("BRIGADE insert fail " + brigade);
+        return false;
+    }
+
+    /**
+     * Method parses the {@link ResultSet} and returns a {@link List} of {@link Brigade}
+     *
+     * @param rs {@link ResultSet} which be persed
+     * @return parse {@code rs} and return {@link List} of {@link Brigade}
+     * @throws SQLException {@link SQLException}
+     */
+    private List<Brigade> parseResultSet(ResultSet rs) throws SQLException {
+        List<Brigade> brigadeList = new ArrayList<>();
+        Brigade brigade;
+        while(rs.next()) {
+            brigade = new Brigade();
+            brigade.setBrigadeId(rs.getLong(BRIGADE_ID) == 0 ? null : rs.getLong(BRIGADE_ID));
+            brigade.setBrigadeName(rs.getString(BRIGADE_NAME));
+            WorkType workType = new WorkType();
+            workType.setWorkTypeId(rs.getLong(WORK_TYPE_ID) == 0 ? null : rs.getLong(WORK_TYPE_ID));
+            workType.setTypeName(rs.getString(TYPE_NAME));
+            brigade.setWorkType(workType);
+
+            brigadeList.add(brigade);
+        }
+
+        return brigadeList;
+    }
+}
