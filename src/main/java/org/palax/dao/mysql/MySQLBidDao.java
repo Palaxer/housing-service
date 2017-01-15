@@ -323,7 +323,6 @@ public class MySQLBidDao implements BidDao {
                 stm.setNull(1,Types.INTEGER);
             else
                 stm.setLong(1, workTypeId);
-            stm.setLong(1, bid.getWorkType().getWorkTypeId());
             stm.setLong(2, bid.getWorkScope());
             stm.setTimestamp(3, bid.getLeadTime());
             Long userId = bid.getUserTenant() != null ? bid.getUserTenant().getUserId() : null;
@@ -331,7 +330,6 @@ public class MySQLBidDao implements BidDao {
                 stm.setNull(4,Types.INTEGER);
             else
                 stm.setLong(4, userId);
-            stm.setLong(4, bid.getUserTenant().getUserId());
             stm.setString(5, bid.getStatus());
             stm.setString(6, bid.getDescription());
             stm.setTimestamp(7, bid.getBidTime());
