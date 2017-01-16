@@ -3,6 +3,8 @@ package org.palax.dao;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.palax.dao.factory.MySQLDAOFactory;
 import org.palax.entity.Role;
 import org.palax.entity.WorkType;
@@ -16,6 +18,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -120,6 +124,61 @@ public class TestWorkTypeDao {
         verify(mockResultSet, times(0)).getLong(1);
 
         assertEquals(workType.getWorkTypeId(), null);
+
+    }
+
+    /**
+     * The method that checks successfuly gets all {@link WorkType} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     *
+     * @throws SQLException {@link SQLException}
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testCorrectGetAllWorkType() throws SQLException {
+
+        List<WorkType> expectedList = new ArrayList<>();
+
+        for(long i = 1; i < 4; i++) {
+            expectedList.add(DataGenerator.generateWorkType(i));
+        }
+
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection()).thenReturn(mockConn);
+        when(mockConn.prepareStatement(anyString())).thenReturn(mockPreparedStm);
+        when(mockPreparedStm.executeQuery()).thenReturn(mockResultSet);
+        when(mockResultSet.next()).thenReturn(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE);
+        when(mockResultSet.getLong(1)).thenAnswer(new Answer<Long>() {
+            int i = 0;
+
+            @Override
+            public Long answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return expectedList.get(i++).getWorkTypeId();
+            }
+        });
+        when(mockResultSet.getString(2)).thenAnswer(new Answer<String>() {
+            int i = 0;
+
+            @Override
+            public String answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return expectedList.get(i++).getTypeName();
+            }
+        });
+
+        WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
+
+        List<WorkType> actualList = workTypeDao.getAllWorkType();
+
+        verify(mockConn, times(1)).prepareStatement(anyString());
+        verify(mockPreparedStm, times(1)).executeQuery();
+        verify(mockResultSet, times(4)).next();
+        verify(mockResultSet, times(3)).getLong(1);
+        verify(mockResultSet, times(3)).getString(2);
+
+        assertEquals(actualList, expectedList);
 
     }
 }
