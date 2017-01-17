@@ -76,6 +76,7 @@ class DataGenerator {
         user.setHouseNumber("1/" + template);
         user.setApartment(template);
         user.setCity("city" + template);
+        user.setPhoneNumber("093-722-939" + template);
 
         return user;
     }

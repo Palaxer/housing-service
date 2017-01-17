@@ -82,6 +82,7 @@ public class TestUserDao {
         user.setFirstName("first name");
         user.setLogin("login");
         user.setPosition("position");
+        user.setPhoneNumber("093-722-9393");
         user.setRole(new Role());
         user.getRole().setRoleId(1L);
         user.setBrigade(new Brigade());
@@ -101,6 +102,7 @@ public class TestUserDao {
         verify(mockPreparedStm, times(1)).setString(9, user.getHouseNumber());
         verify(mockPreparedStm, times(1)).setLong(10, user.getApartment());
         verify(mockPreparedStm, times(1)).setString(11, user.getCity());
+        verify(mockPreparedStm, times(1)).setString(12, user.getPhoneNumber());
         verify(mockPreparedStm, times(1)).executeUpdate();
         verify(mockResultSet, times(1)).next();
         verify(mockResultSet, times(1)).getLong(1);
@@ -142,6 +144,7 @@ public class TestUserDao {
         user.setFirstName("first name");
         user.setLogin("login");
         user.setPosition("position");
+        user.setPhoneNumber("093-722-9393");
         user.setRole(new Role());
         user.getRole().setRoleId(1L);
         user.setBrigade(new Brigade());
@@ -161,6 +164,7 @@ public class TestUserDao {
         verify(mockPreparedStm, times(1)).setString(9, user.getHouseNumber());
         verify(mockPreparedStm, times(1)).setLong(10, user.getApartment());
         verify(mockPreparedStm, times(1)).setString(11, user.getCity());
+        verify(mockPreparedStm, times(1)).setString(12, user.getPhoneNumber());
         verify(mockPreparedStm, times(1)).executeUpdate();
         verify(mockResultSet, times(0)).next();
         verify(mockResultSet, times(0)).getLong(1);
@@ -325,6 +329,14 @@ public class TestUserDao {
                 return expectedList.get(i++).getCity();
             }
         });
+        when(mockResultSet.getString(17)).thenAnswer(new Answer<String>() {
+            int i = 0;
+
+            @Override
+            public String answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return expectedList.get(i++).getPhoneNumber();
+            }
+        });
 
         UserDao userDao = MySQLDAOFactory.getUserDao();
 
@@ -349,6 +361,7 @@ public class TestUserDao {
         verify(mockResultSet, times(3)).getString(14);
         verify(mockResultSet, times(3)).getLong(15);
         verify(mockResultSet, times(3)).getString(16);
+        verify(mockResultSet, times(3)).getString(17);
 
         assertEquals(actualList, expectedList);
 

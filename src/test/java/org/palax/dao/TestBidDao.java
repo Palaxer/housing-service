@@ -373,6 +373,14 @@ public class TestBidDao {
                 return expectedList.get(i++).getWorkType().getTypeName();
             }
         });
+        when(mockResultSet.getString(25)).thenAnswer(new Answer<String>() {
+            int i = 0;
+
+            @Override
+            public String answer(InvocationOnMock invocationOnMock) throws Throwable {
+                return expectedList.get(i++).getUserTenant().getPhoneNumber();
+            }
+        });
 
         BidDao bidDao = MySQLDAOFactory.getBidDao();
 
@@ -405,6 +413,7 @@ public class TestBidDao {
         verify(mockResultSet, times(3)).getLong(4);
         verify(mockResultSet, times(6)).getLong(2);
         verify(mockResultSet, times(3)).getString(3);
+        verify(mockResultSet, times(3)).getString(25);
 
         assertEquals(actualList, expectedList);
 
