@@ -91,6 +91,7 @@
                     <tr>
                         <th class="text-left"><fmt:message key="text.name"/></th>
                         <th class="text-left"><fmt:message key="text.user.position"/></th>
+                        <th class="text-left"><fmt:message key="text.user.phone-number"/></th>
                     </tr>
                     </thead>
                     <tbody class="table-hover">
@@ -98,6 +99,7 @@
                         <tr>
                             <td class="text-left">${user.firstName} ${user.lastName}</td>
                             <td class="text-left">${user.position}</td>
+                            <td class="text-left">${user.phoneNumber}</td>
                         </tr>
                     </c:forEach>
                     </tbody>

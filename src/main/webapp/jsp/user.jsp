@@ -112,6 +112,7 @@
                         <th class="text-left"><fmt:message key="text.user.house-number"/></th>
                         <th class="text-left"><fmt:message key="text.user.apartment"/></th>
                         <th class="text-left"><fmt:message key="text.user.city"/></th>
+                        <th class="text-left"><fmt:message key="text.user.phone-number"/></th>
                         <th class="text-left"><fmt:message key="text.operation"/></th>
                     </tr>
                     </thead>
@@ -127,6 +128,7 @@
                             <td class="text-left">${user.houseNumber}</td>
                             <td class="text-left">${user.apartment}</td>
                             <td class="text-left">${user.city}</td>
+                            <td class="text-left">${user.phoneNumber}</td>
                             <td>
                                 <form action="/">
                                     <input type="hidden" name="command" value="userinfo">

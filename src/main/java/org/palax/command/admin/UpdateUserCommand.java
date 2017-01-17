@@ -57,6 +57,7 @@ public class UpdateUserCommand implements Command {
             updateUser.setStreet(request.getParameter("street"));
             updateUser.setHouseNumber(request.getParameter("house-number"));
             updateUser.setCity(request.getParameter("city"));
+            updateUser.setPhoneNumber(request.getParameter("phone-number"));
 
             updateUser.setApartment(Long.parseLong(request.getParameter("apartment")));
 
@@ -85,6 +86,10 @@ public class UpdateUserCommand implements Command {
             }
             if (!UserService.cityValid(updateUser.getCity())) {
                 builder.setInvalidCityAttr();
+                flag = true;
+            }
+            if (!UserService.phoneNumberValid(updateUser.getPhoneNumber())) {
+                builder.setInvalidPhoneNumber();
                 flag = true;
             }
 

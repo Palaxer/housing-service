@@ -106,6 +106,7 @@ public class UserService {
         to.setHouseNumber(from.getHouseNumber());
         to.setPassword(from.getPassword());
         to.setStreet(from.getStreet());
+        to.setPhoneNumber(from.getPhoneNumber());
     }
 
     /**
@@ -186,5 +187,17 @@ public class UserService {
      */
     public static boolean cityValid(String city) {
         return Pattern.matches("[A-z,А-я]{1,30}-?[A-z,А-я]{1,30}", city);
+    }
+
+    /**
+     * Method validate {@link User} {@code phoneNumber} with next pattern
+     * {@code "[A-z,А-я]{1,30}-?[A-z,А-я]{1,30}"}
+     *
+     * @param phoneNumber validate value
+     * @return returns {@code true} if phone number was valid
+     *         or else {@code false}
+     */
+    public static boolean phoneNumberValid(String phoneNumber) {
+        return Pattern.matches("(\\d{3}-){1,2}\\d{4}", phoneNumber);
     }
 }

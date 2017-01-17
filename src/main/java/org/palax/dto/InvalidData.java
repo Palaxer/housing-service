@@ -22,6 +22,8 @@ public class InvalidData {
     private String invalidCity;
     /**The value is used for store {@code invalidApartment}. */
     private String invalidApartment;
+    /**The value is used for store {@code invalidPhoneNumber}. */
+    private String invalidPhoneNumber;
 
     private InvalidData() {
 
@@ -88,6 +90,15 @@ public class InvalidData {
      */
     public String getInvalidApartment() {
         return invalidApartment;
+    }
+
+    /**
+     * Returns {@code InvalidData} user input invalid phone number
+     *
+     * @return {@code invalidPhoneNumber} specifies what a class to use in view layer
+     */
+    public String getInvalidPhoneNumber() {
+        return invalidPhoneNumber;
     }
 
     /**
@@ -185,7 +196,6 @@ public class InvalidData {
             return this;
         }
 
-
         /**
          * Sets {@code invalidApartment} to {@link InvalidData} instance
          *
@@ -193,6 +203,17 @@ public class InvalidData {
          */
         public Builder setInvalidApartment() {
             InvalidData.this.invalidApartment = attribute;
+
+            return this;
+        }
+
+        /**
+         * Sets {@code invalidPhoneNumber} to {@link InvalidData} instance
+         *
+         * @return {@link Builder} to invoke methods chains
+         */
+        public Builder setInvalidPhoneNumber() {
+            InvalidData.this.invalidPhoneNumber = attribute;
 
             return this;
         }

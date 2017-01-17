@@ -80,6 +80,7 @@
                         <th class="text-left"><fmt:message key="text.user.house-number"/></th>
                         <th class="text-left"><fmt:message key="text.user.apartment"/></th>
                         <th class="text-left"><fmt:message key="text.user.city"/></th>
+                        <th class="text-left"><fmt:message key="text.user.phone-number"/></th>
                     </tr>
                     </thead>
                     <tbody class="table-hover">
@@ -90,6 +91,7 @@
                             <td class="text-left">${bid.userTenant.houseNumber}</td>
                             <td class="text-left">${bid.userTenant.apartment}</td>
                             <td class="text-left">${bid.userTenant.city}</td>
+                            <td class="text-left">${bid.userTenant.phoneNumber}</td>
                         </tr>
                     </tbody>
                 </table>

@@ -36,6 +36,7 @@ public class RegistrationCommand implements Command {
         user.setStreet(request.getParameter("street"));
         user.setHouseNumber(request.getParameter("house-number"));
         user.setCity(request.getParameter("city"));
+        user.setPhoneNumber(request.getParameter("phone-number"));
         try {
             user.setApartment(Long.parseLong(request.getParameter("apartment")));
 
@@ -68,6 +69,10 @@ public class RegistrationCommand implements Command {
             }
             if (!UserService.cityValid(user.getCity())) {
                 builder.setInvalidCityAttr();
+                flag = true;
+            }
+            if (!UserService.phoneNumberValid(user.getPhoneNumber())) {
+                builder.setInvalidPhoneNumber();
                 flag = true;
             }
             if (flag)

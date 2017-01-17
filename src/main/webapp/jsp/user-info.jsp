@@ -116,6 +116,7 @@
                     <input class="${invalidData.invalidHouse}" type="text" name="house-number" value="${user.houseNumber}" title="<fmt:message key="text.user.house-number"/>" placeholder=<fmt:message key="text.user.house-number"/>>
                     <input class="${invalidData.invalidApartment}" type="number" name="apartment" value="${user.apartment}" title="<fmt:message key="text.user.apartment"/>" placeholder=<fmt:message key="text.user.apartment"/>>
                     <input class="${invalidData.invalidCity}" type="text" name="city" value="${user.city}" title="<fmt:message key="text.user.city"/>" placeholder=<fmt:message key="text.user.city"/>>
+                    <input class="${invalidData.invalidPhoneNumber}" type="text" name="phone-number" value="${user.phoneNumber}" title="<fmt:message key="text.user.phone-number"/>" placeholder=<fmt:message key="text.user.phone-number"/>>
 
                     <input class="submit" type="submit" value="<fmt:message key="text.button.update"/>">
                 </form>

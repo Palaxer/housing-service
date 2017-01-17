@@ -38,6 +38,7 @@ public class UpdateUserProfileCommand implements Command {
         updateUser.setStreet(request.getParameter("street"));
         updateUser.setHouseNumber(request.getParameter("house-number"));
         updateUser.setCity(request.getParameter("city"));
+        updateUser.setPhoneNumber(request.getParameter("phone-number"));
         try {
             updateUser.setApartment(Long.parseLong(request.getParameter("apartment")));
         } catch (NumberFormatException e) {
@@ -68,6 +69,10 @@ public class UpdateUserProfileCommand implements Command {
         }
         if (!UserService.cityValid(updateUser.getCity())) {
             request.setAttribute("invalidCity", "invalid");
+            flag = true;
+        }
+        if (!UserService.phoneNumberValid(updateUser.getPhoneNumber())) {
+            request.setAttribute("invalidPhoneNumber", "invalid");
             flag = true;
         }
 

@@ -41,6 +41,7 @@ public class MySQLUserDao implements UserDao {
     private static final int HOUSE_NUMBER = 14;
     private static final int APARTMENT = 15;
     private static final int CITY = 16;
+    private static final int PHONE_NUMBER = 17;
 
     private MySQLUserDao() {
 
@@ -67,7 +68,7 @@ public class MySQLUserDao implements UserDao {
     public List<User> getAllUser() {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
-                "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY " +
+                "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
                 "FROM housing_service.user A " +
                 "LEFT JOIN housing_service.role B ON (A.ROLE_ID=B.ROLE_ID) " +
                 "LEFT JOIN housing_service.brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
@@ -103,7 +104,7 @@ public class MySQLUserDao implements UserDao {
     public List<User> getAllUserByBrigadeId(Long id) {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
-                "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY " +
+                "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
                 "FROM housing_service.user A " +
                 "LEFT JOIN housing_service.role B ON (A.ROLE_ID=B.ROLE_ID) " +
                 "LEFT JOIN housing_service.brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
@@ -141,7 +142,7 @@ public class MySQLUserDao implements UserDao {
     public User getUserById(Long id) {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
-                "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY " +
+                "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
                 "FROM housing_service.user A " +
                 "LEFT JOIN housing_service.role B ON (A.ROLE_ID=B.ROLE_ID) " +
                 "LEFT JOIN housing_service.brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
@@ -180,7 +181,7 @@ public class MySQLUserDao implements UserDao {
     public User getUserByLogin(String login) {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
-                "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY " +
+                "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
                 "FROM housing_service.user A " +
                 "LEFT JOIN housing_service.role B ON (A.ROLE_ID=B.ROLE_ID) " +
                 "LEFT JOIN housing_service.brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
@@ -245,7 +246,7 @@ public class MySQLUserDao implements UserDao {
     @Override
     public boolean updateUser(User user) {
         String SQL = "UPDATE housing_service.user SET LOGIN=?, PASSWD=?, ROLE_ID=?, FIRST_NAME=?, LAST_NAME=?, POSITION=?," +
-                " BRIGADE_ID=?, STREET=?, HOUSE_NUMBER=?, APARTMENT=?, CITY=? WHERE USER_ID=?";
+                " BRIGADE_ID=?, STREET=?, HOUSE_NUMBER=?, APARTMENT=?, CITY=?, PHONE_NUMBER=? WHERE USER_ID=?";
 
         logger.debug("Try update USER " + user);
 
@@ -273,6 +274,7 @@ public class MySQLUserDao implements UserDao {
             stm.setLong(10, user.getApartment());
             stm.setString(11, user.getCity());
             stm.setLong(12, user.getUserId());
+            stm.setString(13, user.getPhoneNumber());
             if(stm.executeUpdate() > 0) {
                 logger.debug("USER update successfully " + user);
                 return true;
@@ -295,7 +297,7 @@ public class MySQLUserDao implements UserDao {
     @Override
     public boolean insertUser(User user) {
         String SQL = "INSERT INTO housing_service.user (LOGIN, PASSWD, ROLE_ID, FIRST_NAME, LAST_NAME, POSITION," +
-                " BRIGADE_ID, STREET, HOUSE_NUMBER, APARTMENT, CITY) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                " BRIGADE_ID, STREET, HOUSE_NUMBER, APARTMENT, CITY, PHONE_NUMBER) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         logger.debug("Try insert USER " + user);
 
@@ -323,6 +325,7 @@ public class MySQLUserDao implements UserDao {
             stm.setString(9, user.getHouseNumber());
             stm.setLong(10, user.getApartment());
             stm.setString(11, user.getCity());
+            stm.setString(12, user.getPhoneNumber());
 
             if(stm.executeUpdate() > 0) {
                 rs = stm.getGeneratedKeys();
@@ -379,6 +382,7 @@ public class MySQLUserDao implements UserDao {
             user.setHouseNumber(rs.getString(HOUSE_NUMBER));
             user.setApartment(rs.getLong(APARTMENT));
             user.setCity(rs.getString(CITY));
+            user.setPhoneNumber(rs.getString(PHONE_NUMBER));
 
             userList.add(user);
         }

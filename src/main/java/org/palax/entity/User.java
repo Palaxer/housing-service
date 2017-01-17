@@ -31,6 +31,8 @@ public class User {
     private Long apartment;
     /**The value is used for store {@code User} city. */
     private String city;
+    /**The value is user for store {@code User} phone number */
+    private String phoneNumber;
 
     /**
      * Returns {@code User} id which will be unique
@@ -249,6 +251,24 @@ public class User {
     }
 
     /**
+     * Returns {@code User} phone number
+     *
+     * @return {@code phoneNumber}
+     */
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    /**
+     * Sets {@code User} phone number
+     *
+     * @param phoneNumber {@code phoneNumber}
+     */
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    /**
      * Compares two {@code User} for equality.
      *
      * @param o the {@code Object} value to compare with
@@ -274,7 +294,8 @@ public class User {
         if (street != null ? !street.equals(user.street) : user.street != null) return false;
         if (houseNumber != null ? !houseNumber.equals(user.houseNumber) : user.houseNumber != null) return false;
         if (apartment != null ? !apartment.equals(user.apartment) : user.apartment != null) return false;
-        return city != null ? city.equals(user.city) : user.city == null;
+        if (city != null ? !city.equals(user.city) : user.city != null) return false;
+        return phoneNumber != null ? phoneNumber.equals(user.phoneNumber) : user.phoneNumber == null;
     }
 
     /**
@@ -296,6 +317,7 @@ public class User {
         result = 31 * result + (houseNumber != null ? houseNumber.hashCode() : 0);
         result = 31 * result + (apartment != null ? apartment.hashCode() : 0);
         result = 31 * result + (city != null ? city.hashCode() : 0);
+        result = 31 * result + (phoneNumber != null ? phoneNumber.hashCode() : 0);
         return result;
     }
 
@@ -321,6 +343,7 @@ public class User {
                 ", houseNumber='" + houseNumber + '\'' +
                 ", apartment=" + apartment +
                 ", city='" + city + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
                 '}';
     }
 }

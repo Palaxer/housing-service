@@ -46,6 +46,7 @@ public class MySQLBidDao implements BidDao {
     private static final int STATUS = 22;
     private static final int DESCRIPTION = 23;
     private static final int BID_TIME = 24;
+    private static final int PHONE_NUMBER = 25;
 
     private MySQLBidDao(){
 
@@ -74,7 +75,7 @@ public class MySQLBidDao implements BidDao {
         String SQL = "SELECT A.BID_ID, A.WORK_TYPE_ID, B.TYPE_NAME, A.WORK_SCOPE, A.LEAD_TIME, " +
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
-                "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME " +
+                "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME, C.PHONE_NUMBER " +
                 "FROM housing_service.bid A " +
                 "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
                 "LEFT JOIN housing_service.user C ON (A.USER_TENANT_ID=C.USER_ID) " +
@@ -113,7 +114,7 @@ public class MySQLBidDao implements BidDao {
         String SQL = "SELECT A.BID_ID, A.WORK_TYPE_ID, B.TYPE_NAME, A.WORK_SCOPE, A.LEAD_TIME, " +
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
-                "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME " +
+                "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME, C.PHONE_NUMBER " +
                 "FROM housing_service.bid A " +
                 "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
                 "LEFT JOIN housing_service.user C ON (A.USER_TENANT_ID=C.USER_ID) " +
@@ -154,7 +155,7 @@ public class MySQLBidDao implements BidDao {
         String SQL = "SELECT A.BID_ID, A.WORK_TYPE_ID, B.TYPE_NAME, A.WORK_SCOPE, A.LEAD_TIME, " +
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
-                "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME " +
+                "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME, C.PHONE_NUMBER " +
                 "FROM housing_service.bid A " +
                 "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
                 "LEFT JOIN housing_service.user C ON (A.USER_TENANT_ID=C.USER_ID) " +
@@ -195,7 +196,7 @@ public class MySQLBidDao implements BidDao {
         String SQL = "SELECT A.BID_ID, A.WORK_TYPE_ID, B.TYPE_NAME, A.WORK_SCOPE, A.LEAD_TIME, " +
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
-                "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME " +
+                "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME, C.PHONE_NUMBER " +
                 "FROM housing_service.bid A " +
                 "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
                 "LEFT JOIN housing_service.user C ON (A.USER_TENANT_ID=C.USER_ID) " +
@@ -394,6 +395,7 @@ public class MySQLBidDao implements BidDao {
             user.setHouseNumber(rs.getString(HOUSE_NUMBER));
             user.setApartment(rs.getLong(APARTMENT));
             user.setCity(rs.getString(CITY));
+            user.setPhoneNumber(rs.getString(PHONE_NUMBER));
             bid.setUserTenant(user);
             bid.setWorkScope(rs.getLong(WORK_SCOPE));
             workType = new WorkType();
