@@ -66,6 +66,7 @@ public class DateTimeFormat extends SimpleTagSupport {
                 break;
         }
 
-        getJspContext().getOut().write(df.format(date.toLocalDateTime()));
+        if(date != null)
+            getJspContext().getOut().write(df.format(date.toLocalDateTime()));
     }
 }

@@ -2,6 +2,7 @@ package org.palax.dao.mysql;
 
 import org.apache.log4j.Logger;
 import org.palax.dao.UserDao;
+import org.palax.dao.transaction.TransactionUserDao;
 import org.palax.entity.Brigade;
 import org.palax.entity.Role;
 import org.palax.entity.User;
@@ -18,7 +19,7 @@ import java.util.List;
  * @author Taras Palashynskyy
  */
 
-public class MySQLUserDao implements UserDao {
+public class MySQLUserDao implements UserDao, TransactionUserDao {
     /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(MySQLUserDao.class);
 
@@ -66,6 +67,18 @@ public class MySQLUserDao implements UserDao {
      */
     @Override
     public List<User> getAllUser() {
+        Connection con = DataSourceManager.getConnection();
+        List<User> userList = getAllUserTransaction(con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return userList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<User> getAllUserTransaction(Connection con) {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
                 "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
@@ -78,7 +91,6 @@ public class MySQLUserDao implements UserDao {
 
         logger.debug("Try get all USER");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -91,7 +103,7 @@ public class MySQLUserDao implements UserDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return userList;
@@ -102,6 +114,18 @@ public class MySQLUserDao implements UserDao {
      */
     @Override
     public List<User> getAllUserByBrigadeId(Long id) {
+        Connection con = DataSourceManager.getConnection();
+        List<User> userList = getAllUserByBrigadeIdTransacion(id, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return userList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<User> getAllUserByBrigadeIdTransacion(Long id, Connection con) {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
                 "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
@@ -115,7 +139,6 @@ public class MySQLUserDao implements UserDao {
 
         logger.debug("Try get all USER");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -129,7 +152,7 @@ public class MySQLUserDao implements UserDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return userList;
@@ -140,6 +163,18 @@ public class MySQLUserDao implements UserDao {
      */
     @Override
     public User getUserById(Long id) {
+        Connection con = DataSourceManager.getConnection();
+        User user = getUserByIdTransaction(id, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return user;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public User getUserByIdTransaction(Long id, Connection con) {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
                 "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
@@ -153,7 +188,6 @@ public class MySQLUserDao implements UserDao {
 
         logger.debug("Try get USER by ID " + id);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -168,7 +202,7 @@ public class MySQLUserDao implements UserDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return user;
@@ -179,6 +213,18 @@ public class MySQLUserDao implements UserDao {
      */
     @Override
     public User getUserByLogin(String login) {
+        Connection con = DataSourceManager.getConnection();
+        User user = getUserByLoginTransaction(login, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return user;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public User getUserByLoginTransaction(String login, Connection con) {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
                 "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
@@ -192,7 +238,6 @@ public class MySQLUserDao implements UserDao {
 
         logger.debug("Try get USER by NAME " + login);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -207,7 +252,7 @@ public class MySQLUserDao implements UserDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return user;
@@ -218,11 +263,22 @@ public class MySQLUserDao implements UserDao {
      */
     @Override
     public boolean deleteUser(User user) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = deleteUserTransaction(user, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean deleteUserTransaction(User user, Connection con) {
         String SQL = "DELETE FROM housing_service.user WHERE USER_ID=?";
 
         logger.debug("Try delete USER " + user);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -234,7 +290,7 @@ public class MySQLUserDao implements UserDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("USER delete fail " + user);
         return false;
@@ -245,12 +301,23 @@ public class MySQLUserDao implements UserDao {
      */
     @Override
     public boolean updateUser(User user) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = updateUserTransaction(user, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean updateUserTransaction(User user, Connection con) {
         String SQL = "UPDATE housing_service.user SET LOGIN=?, PASSWD=?, ROLE_ID=?, FIRST_NAME=?, LAST_NAME=?, POSITION=?," +
                 " BRIGADE_ID=?, STREET=?, HOUSE_NUMBER=?, APARTMENT=?, CITY=?, PHONE_NUMBER=? WHERE USER_ID=?";
 
         logger.debug("Try update USER " + user);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -285,7 +352,7 @@ public class MySQLUserDao implements UserDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("USER update fail " + user);
         return false;
@@ -296,12 +363,23 @@ public class MySQLUserDao implements UserDao {
      */
     @Override
     public boolean insertUser(User user) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = insertUserTransaction(user, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean insertUserTransaction(User user, Connection con) {
         String SQL = "INSERT INTO housing_service.user (LOGIN, PASSWD, ROLE_ID, FIRST_NAME, LAST_NAME, POSITION," +
                 " BRIGADE_ID, STREET, HOUSE_NUMBER, APARTMENT, CITY, PHONE_NUMBER) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         logger.debug("Try insert USER " + user);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -341,7 +419,7 @@ public class MySQLUserDao implements UserDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("USER insert fail " + user);
         return false;

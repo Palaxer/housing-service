@@ -32,7 +32,7 @@ public class CompleteWorkCommand implements Command {
 
         Long index = Long.parseLong(request.getParameter("index"));
 
-        WorkPlaneService.changeWorkPlaneStatusById("COMPLETE", index);
+        WorkPlaneService.completeWorkPlaneById(index);
 
         page = PathManager.getProperty("path.page.crew-work-plane");
 

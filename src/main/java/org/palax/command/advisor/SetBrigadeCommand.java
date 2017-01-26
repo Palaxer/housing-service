@@ -61,8 +61,6 @@ public class SetBrigadeCommand implements Command {
 
 
             if(WorkPlaneService.setBrigadeToWorkPlane(brigade, workPlane)) {
-                bid.setStatus("IN WORK");
-                MySQLDAOFactory.getBidDao().updateBid(bid);
                 page = PathManager.getProperty("path.redirect.advisor");
             } else {
                 request.setAttribute("bid", bid);

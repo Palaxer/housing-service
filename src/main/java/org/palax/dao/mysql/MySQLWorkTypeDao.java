@@ -2,6 +2,7 @@ package org.palax.dao.mysql;
 
 import org.apache.log4j.Logger;
 import org.palax.dao.WorkTypeDao;
+import org.palax.dao.transaction.TransactionWorkTypeDao;
 import org.palax.entity.WorkType;
 import org.palax.utils.DataSourceManager;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * @author Taras Palashynskyy
  */
 
-public class MySQLWorkTypeDao implements WorkTypeDao {
+public class MySQLWorkTypeDao implements WorkTypeDao, TransactionWorkTypeDao {
     /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(MySQLWorkTypeDao.class);
 
@@ -48,6 +49,18 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
      */
     @Override
     public List<WorkType> getAllWorkType() {
+        Connection con = DataSourceManager.getConnection();
+        List<WorkType> workTypeList = getAllWorkTypeTransaction(con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return workTypeList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<WorkType> getAllWorkTypeTransaction(Connection con) {
         String SQL = "SELECT * FROM housing_service.work_type";
 
         ArrayList<WorkType> workTypeList = new ArrayList<>();
@@ -55,7 +68,6 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
 
         logger.debug("Try get all WORK_TYPE");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -74,24 +86,35 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return workTypeList;
-}
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public WorkType getWorkTypeByName(String name) {
+        Connection con = DataSourceManager.getConnection();
+        WorkType workType = getWorkTypeByNameTransaction(name, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return workType;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public WorkType getWorkTypeByNameTransaction(String name, Connection con) {
         String SQL = "SELECT * FROM housing_service.work_type WHERE TYPE_NAME=?";
 
         WorkType workType = null;
 
         logger.debug("Try get WORK_TYPE by NAME " + name);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -109,7 +132,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return workType;
@@ -120,13 +143,24 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
      */
     @Override
     public WorkType getWorkTypeById(Long id) {
+        Connection con = DataSourceManager.getConnection();
+        WorkType workType = getWorkTypeByIdTransaction(id, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return workType;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public WorkType getWorkTypeByIdTransaction(Long id, Connection con) {
         String SQL = "SELECT * FROM housing_service.work_type WHERE WORK_TYPE_ID=?";
 
         WorkType workType = null;
 
         logger.debug("Try get WORK_TYPE by ID " + id);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -144,7 +178,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return workType;
@@ -155,11 +189,22 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
      */
     @Override
     public boolean deleteWorkType(WorkType workType) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = deleteWorkTypeTransaction(workType, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean deleteWorkTypeTransaction(WorkType workType, Connection con) {
         String SQL = "DELETE FROM housing_service.work_type WHERE WORK_TYPE_ID=?";
 
         logger.debug("Try delete WORK_TYPE " + workType);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -171,7 +216,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("WORK_TYPE delete fail " + workType);
         return false;
@@ -182,11 +227,22 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
      */
     @Override
     public boolean updateWorkType(WorkType workType) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = updateWorkTypeTransaction(workType, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean updateWorkTypeTransaction(WorkType workType, Connection con) {
         String SQL = "UPDATE housing_service.work_type SET TYPE_NAME=? WHERE WORK_TYPE_ID=?";
 
         logger.debug("Try update WORK_TYPE " + workType);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -199,7 +255,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("WORK_TYPE update fail " + workType);
         return false;
@@ -210,12 +266,23 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
      */
     @Override
     public boolean insertWorkType(WorkType workType) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = insertWorkTypeTransaction(workType, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean insertWorkTypeTransaction(WorkType workType, Connection con) {
         String SQL = "INSERT INTO housing_service.work_type (TYPE_NAME)  " +
                 "VALUES (?)";
 
         logger.debug("Try insert WORK_TYPE " + workType);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -232,7 +299,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("WORK_TYPE insert fail " + workType);
         return false;

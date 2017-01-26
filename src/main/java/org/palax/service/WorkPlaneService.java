@@ -1,9 +1,14 @@
 package org.palax.service;
 
+import org.apache.log4j.Logger;
 import org.palax.dao.factory.MySQLDAOFactory;
+import org.palax.dao.factory.TransactionMySQLDAOFactory;
 import org.palax.entity.Brigade;
 import org.palax.entity.WorkPlane;
+import org.palax.utils.DataSourceManager;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,6 +21,8 @@ import java.util.List;
  */
 
 public class WorkPlaneService {
+
+    private static final Logger logger = Logger.getLogger(WorkPlaneService.class);
 
     private WorkPlaneService() {
 
@@ -81,31 +88,78 @@ public class WorkPlaneService {
      *         or else {@code false}
      */
     public static boolean setBrigadeToWorkPlane(Brigade brigade, WorkPlane workPlane) {
+        Boolean result = false;
         if(brigade == null)
-            return false;
+            return result;
 
         if(BrigadeService.datatimeValid(brigade, workPlane, 20)) {
-            workPlane.setBrigade(brigade);
-            return MySQLDAOFactory.getWorkPlaneDao().insertWorkPlane(workPlane);
+            Connection con = DataSourceManager.getConnection();
+
+            try {
+                con.setAutoCommit(false);
+
+                workPlane.setBrigade(brigade);
+
+                if(TransactionMySQLDAOFactory.getWorkPlaneDao().insertWorkPlaneTransaction(workPlane, con)) {
+                    workPlane.getBid().setStatus("IN WORK");
+                    if(TransactionMySQLDAOFactory.getBidDao().updateBidTransaction(workPlane.getBid(), con)) {
+                        con.commit();
+                        result = true;
+                    } else {
+                        con.rollback();
+                        logger.debug("Statement was roll back");
+                    }
+                }
+
+                con.setAutoCommit(true);
+
+            } catch (SQLException e) {
+                logger.error("Threw a SQLException, full stack trace follows:", e);
+            } finally {
+                DataSourceManager.closeAll(con, null, null);
+            }
         }
 
-        return false;
+        return result;
     }
 
     /**
-     * Method change the {@code status} of the {@link WorkPlane} results by {@code id}
+     * Method change the {@code status} to {@code COMPLETE} of the {@link WorkPlane} results by {@code id}
      *
      * @param id it indicates an {@link WorkPlane} {@code id} that you want change
-     * @param status this value will change the {@code status} of the {@link WorkPlane}
      * @return returns {@code true} if the status is changed
      *         or else {@code false}
      */
-    public static boolean changeWorkPlaneStatusById(String status, Long id) {
+    public static boolean completeWorkPlaneById(Long id) {
         WorkPlane workPlane = MySQLDAOFactory.getWorkPlaneDao().getWorkPlaneById(id);
 
-        workPlane.setStatus(status);
-        workPlane.setCompleteTime(Timestamp.valueOf(LocalDateTime.now()));
+        Boolean result = false;
+        Connection con = DataSourceManager.getConnection();
+        try {
+            con.setAutoCommit(false);
 
-        return MySQLDAOFactory.getWorkPlaneDao().updateWorkPlane(workPlane);
+            workPlane.setStatus("COMPLETE");
+            workPlane.setCompleteTime(Timestamp.valueOf(LocalDateTime.now()));
+
+            if(TransactionMySQLDAOFactory.getWorkPlaneDao().updateWorkPlaneTransaction(workPlane, con)) {
+                workPlane.getBid().setStatus("COMPLETE");
+                if(TransactionMySQLDAOFactory.getBidDao().updateBidTransaction(workPlane.getBid(), con)) {
+                    con.commit();
+                    result = true;
+                } else {
+                    con.rollback();
+                    logger.debug("Statement was roll back");
+                }
+            }
+
+            con.setAutoCommit(true);
+
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:", e);
+        } finally {
+            DataSourceManager.closeAll(con, null, null);
+        }
+
+        return result;
     }
 }

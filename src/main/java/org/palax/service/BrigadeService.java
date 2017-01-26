@@ -68,7 +68,7 @@ public class BrigadeService {
                 .getWorkType().getTypeName());
 
         for (WorkPlane el : workPlaneList) {
-            long period = ChronoUnit.HOURS.between(el.getWorkTime().toLocalDateTime(),
+            long period = ChronoUnit.MINUTES.between(el.getWorkTime().toLocalDateTime(),
                     workPlane.getWorkTime().toLocalDateTime());
             long workScope = el.getBid().getWorkScope();
             if(!(period >= (minPerWorkScope * workScope) ||

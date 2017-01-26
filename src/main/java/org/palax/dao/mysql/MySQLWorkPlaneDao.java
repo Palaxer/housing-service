@@ -3,6 +3,7 @@ package org.palax.dao.mysql;
 import org.apache.log4j.Logger;
 import org.palax.dao.WorkPlaneDao;
 import org.palax.dao.factory.MySQLDAOFactory;
+import org.palax.dao.transaction.TransactionWorkPlaneDao;
 import org.palax.entity.Bid;
 import org.palax.entity.Brigade;
 import org.palax.entity.User;
@@ -19,7 +20,7 @@ import java.util.List;
  * @author Taras Palashynskyy
  */
 
-public class MySQLWorkPlaneDao implements WorkPlaneDao {
+public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao {
     /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(MySQLWorkPlaneDao.class);
 
@@ -57,13 +58,24 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
      */
     @Override
     public List<WorkPlane> getAllWorkPlane() {
+        Connection con = DataSourceManager.getConnection();
+        List<WorkPlane> workPlaneList = getAllWorkPlaneTransaction(con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return workPlaneList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<WorkPlane> getAllWorkPlaneTransaction(Connection con) {
         String SQL = "SELECT * FROM housing_service.work_plane";
 
         List<WorkPlane> workPlaneList = null;
 
         logger.debug("Try get all WORK_PLANE");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -76,7 +88,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return workPlaneList;
@@ -87,6 +99,18 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
      */
     @Override
     public List<WorkPlane> getAllWorkPlaneByWorkType(String workType) {
+        Connection con = DataSourceManager.getConnection();
+        List<WorkPlane> workPlaneList = getAllWorkPlaneByWorkTypeTransaction(workType, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return workPlaneList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<WorkPlane> getAllWorkPlaneByWorkTypeTransaction(String workType, Connection con) {
         String SQL = "SELECT A.WORK_PLANE_ID, A.USER_ADVISOR_ID, A.BRIGADE_ID, A.BID_ID, A.STATUS, A.WORK_TIME, A.COMPLETE_TIME " +
                 "FROM housing_service.work_plane A " +
                 "LEFT JOIN housing_service.brigade B ON (A.BRIGADE_ID=B.BRIGADE_ID) " +
@@ -97,7 +121,6 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
 
         logger.debug("Try get all WORK_PLANE by WORK_TYPE");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -111,7 +134,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return workPlaneList;
@@ -122,6 +145,18 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
      */
     @Override
     public List<WorkPlane> getAllWorkPlaneByBrigadeId(Long id) {
+        Connection con = DataSourceManager.getConnection();
+        List<WorkPlane> workPlaneList = getAllWorkPlaneByBrigadeIdTransaction(id, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return workPlaneList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<WorkPlane> getAllWorkPlaneByBrigadeIdTransaction(Long id, Connection con) {
         String SQL = "SELECT A.WORK_PLANE_ID, A.USER_ADVISOR_ID, A.BRIGADE_ID, A.BID_ID, A.STATUS, A.WORK_TIME, A.COMPLETE_TIME " +
                 "FROM housing_service.work_plane A " +
                 "WHERE A.BRIGADE_ID=?";
@@ -130,7 +165,6 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
 
         logger.debug("Try get all WORK_PLANE by WORK_TYPE");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -144,7 +178,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return workPlaneList;
@@ -155,13 +189,24 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
      */
     @Override
     public WorkPlane getWorkPlaneById(Long id) {
+        Connection con = DataSourceManager.getConnection();
+        WorkPlane workPlane = getWorkPlaneByIdTransaction(id, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return workPlane;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public WorkPlane getWorkPlaneByIdTransaction(Long id, Connection con) {
         String SQL = "SELECT * FROM housing_service.work_plane WHERE WORK_PLANE_ID=?";
 
         WorkPlane workPlane = null;
 
         logger.debug("Try get WORK_PLANE by ID " + id);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -175,7 +220,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return workPlane;
@@ -186,13 +231,24 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
      */
     @Override
     public WorkPlane getWorkPlaneByBidId(Long id) {
+        Connection con = DataSourceManager.getConnection();
+        WorkPlane workPlane = getWorkPlaneByBidIdTransaction(id, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return workPlane;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public WorkPlane getWorkPlaneByBidIdTransaction(Long id, Connection con) {
         String SQL = "SELECT * FROM housing_service.work_plane WHERE BID_ID=?";
 
         WorkPlane workPlane = null;
 
         logger.debug("Try get WORK_PLANE by BID_ID " + id);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -206,7 +262,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return workPlane;
@@ -217,11 +273,22 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
      */
     @Override
     public boolean deleteWorkPlane(WorkPlane workPlane) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = deleteWorkPlaneTransaction(workPlane, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean deleteWorkPlaneTransaction(WorkPlane workPlane, Connection con) {
         String SQL = "DELETE FROM housing_service.work_plane WHERE WORK_PLANE_ID=?";
 
         logger.debug("Try delete WORK_PLANE " + workPlane);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -233,7 +300,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("WORK_PLANE delete fail " + workPlane);
         return false;
@@ -244,12 +311,23 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
      */
     @Override
     public boolean updateWorkPlane(WorkPlane workPlane) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = updateWorkPlaneTransaction(workPlane, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean updateWorkPlaneTransaction(WorkPlane workPlane, Connection con) {
         String SQL = "UPDATE housing_service.work_plane SET BRIGADE_ID=?, BID_ID=?, STATUS=?, USER_ADVISOR_ID=?," +
                 " WORK_TIME=?, COMPLETE_TIME=? WHERE WORK_PLANE_ID=?";
 
         logger.debug("Try update WORK_PLANE " + workPlane);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -283,7 +361,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("WORK_PLANE update fail " + workPlane);
         return false;
@@ -294,12 +372,23 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
      */
     @Override
     public boolean insertWorkPlane(WorkPlane workPlane) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = insertWorkPlaneTransaction(workPlane, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean insertWorkPlaneTransaction(WorkPlane workPlane, Connection con) {
         String SQL = "INSERT INTO housing_service.work_plane (BRIGADE_ID, BID_ID, STATUS, USER_ADVISOR_ID, WORK_TIME," +
                 " COMPLETE_TIME) VALUES (?, ?, ?, ?, ?, ?)";
 
         logger.debug("Try insert WORK_PLANE " + workPlane);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -336,7 +425,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("WORK_PLANE insert fail " + workPlane);
         return false;

@@ -2,6 +2,7 @@ package org.palax.dao.mysql;
 
 import org.apache.log4j.Logger;
 import org.palax.dao.RoleDao;
+import org.palax.dao.transaction.TransactionRoleDao;
 import org.palax.entity.Role;
 import org.palax.utils.DataSourceManager;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * @author Taras Palashynskyy
  */
 
-public class MySQLRoleDao implements RoleDao {
+public class MySQLRoleDao implements RoleDao, TransactionRoleDao {
     /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(MySQLRoleDao.class);
 
@@ -48,6 +49,18 @@ public class MySQLRoleDao implements RoleDao {
      */
     @Override
     public List<Role> getAllRole() {
+        Connection con = DataSourceManager.getConnection();
+        List<Role> roleList = getAllRoleTransaction(con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return roleList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Role> getAllRoleTransaction(Connection con) {
         String SQL = "SELECT * FROM housing_service.role";
 
         ArrayList<Role> roleList = new ArrayList<>();
@@ -55,7 +68,6 @@ public class MySQLRoleDao implements RoleDao {
 
         logger.debug("Try get all ROLE");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -74,7 +86,7 @@ public class MySQLRoleDao implements RoleDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return roleList;
@@ -85,12 +97,23 @@ public class MySQLRoleDao implements RoleDao {
      */
     @Override
     public Role getRoleByName(String name) {
+        Connection con = DataSourceManager.getConnection();
+        Role role = getRoleByNameTransaction(name, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return role;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Role getRoleByNameTransaction(String name, Connection con) {
         String SQL = "SELECT * FROM housing_service.role WHERE ROLE_TYPE=?";
         Role role = null;
 
         logger.debug("Try get ROLE by NAME " + name);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -108,7 +131,7 @@ public class MySQLRoleDao implements RoleDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return role;
@@ -119,12 +142,23 @@ public class MySQLRoleDao implements RoleDao {
      */
     @Override
     public Role getRoleById(Long id) {
+        Connection con = DataSourceManager.getConnection();
+        Role role = getRoleByIdTransaction(id, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return role;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Role getRoleByIdTransaction(Long id, Connection con) {
         String SQL = "SELECT * FROM housing_service.role WHERE ROLE_ID=?";
         Role role = null;
 
         logger.debug("Try get ROLE by ID " + id);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -142,7 +176,7 @@ public class MySQLRoleDao implements RoleDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return role;
@@ -153,11 +187,22 @@ public class MySQLRoleDao implements RoleDao {
      */
     @Override
     public boolean deleteRole(Role role) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = deleteRoleTransaction(role, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean deleteRoleTransaction(Role role, Connection con) {
         String SQL = "DELETE FROM housing_service.role WHERE ROLE_ID=?";
 
         logger.debug("Try delete ROLE " + role);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -169,7 +214,7 @@ public class MySQLRoleDao implements RoleDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("ROLE delete fail " + role);
         return false;
@@ -180,11 +225,22 @@ public class MySQLRoleDao implements RoleDao {
      */
     @Override
     public boolean updateRole(Role role) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = updateRoleTransaction(role, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean updateRoleTransaction(Role role, Connection con) {
         String SQL = "UPDATE housing_service.role SET ROLE_TYPE=? WHERE ROLE_ID=?";
 
         logger.debug("Try update ROLE " + role);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -197,7 +253,7 @@ public class MySQLRoleDao implements RoleDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("ROLE update fail " + role);
         return false;
@@ -208,12 +264,23 @@ public class MySQLRoleDao implements RoleDao {
      */
     @Override
     public boolean insertRole(Role role) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = insertRoleTransaction(role, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean insertRoleTransaction(Role role, Connection con) {
         String SQL = "INSERT INTO housing_service.role (ROLE_TYPE)  " +
                 "VALUES (?)";
 
         logger.debug("Try insert ROLE " + role);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -230,7 +297,7 @@ public class MySQLRoleDao implements RoleDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("ROLE insert fail " + role);
         return false;

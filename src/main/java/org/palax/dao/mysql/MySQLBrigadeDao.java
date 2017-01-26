@@ -2,6 +2,7 @@ package org.palax.dao.mysql;
 
 import org.apache.log4j.Logger;
 import org.palax.dao.BrigadeDao;
+import org.palax.dao.transaction.TransactionBrigadeDao;
 import org.palax.entity.Brigade;
 import org.palax.entity.WorkType;
 import org.palax.utils.DataSourceManager;
@@ -16,7 +17,7 @@ import java.util.List;
  * @author Taras Palashynskyy
  */
 
-public class MySQLBrigadeDao implements BrigadeDao {
+public class MySQLBrigadeDao implements BrigadeDao, TransactionBrigadeDao {
     /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(MySQLBrigadeDao.class);
 
@@ -51,6 +52,18 @@ public class MySQLBrigadeDao implements BrigadeDao {
      */
     @Override
     public List<Brigade> getAllBrigade() {
+        Connection con = DataSourceManager.getConnection();
+        List<Brigade> brigadeList = getAllBrigadeTransaction(con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return  brigadeList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Brigade> getAllBrigadeTransaction(Connection con){
         String SQL = "SELECT A.BRIGADE_ID, A.BRIGADE_NAME, A.WORK_TYPE_ID, B.TYPE_NAME " +
                 "FROM housing_service.brigade A " +
                 "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID)";
@@ -59,7 +72,6 @@ public class MySQLBrigadeDao implements BrigadeDao {
 
         logger.debug("Try get all BRIGADE");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -72,7 +84,7 @@ public class MySQLBrigadeDao implements BrigadeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return brigadeList;
@@ -83,6 +95,18 @@ public class MySQLBrigadeDao implements BrigadeDao {
      */
     @Override
     public List<Brigade> getAllBrigadeByWorkType(String workType) {
+        Connection con = DataSourceManager.getConnection();
+        List<Brigade> brigadeList = getAllBrigadeByWorkTypeTransaction(workType, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return  brigadeList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Brigade> getAllBrigadeByWorkTypeTransaction(String workType, Connection con) {
         String SQL = "SELECT A.BRIGADE_ID, A.BRIGADE_NAME, A.WORK_TYPE_ID, B.TYPE_NAME " +
                 "FROM housing_service.brigade A " +
                 "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
@@ -92,7 +116,6 @@ public class MySQLBrigadeDao implements BrigadeDao {
 
         logger.debug("Try get BRIGADE by WORK_TYPE " + workType);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -106,7 +129,7 @@ public class MySQLBrigadeDao implements BrigadeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return brigadeList;
@@ -117,6 +140,18 @@ public class MySQLBrigadeDao implements BrigadeDao {
      */
     @Override
     public Brigade getBrigadeById(Long id) {
+        Connection con = DataSourceManager.getConnection();
+        Brigade brigade = getBrigadeByIdTransaction(id, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return  brigade;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Brigade getBrigadeByIdTransaction(Long id, Connection con) {
         String SQL = "SELECT A.BRIGADE_ID, A.BRIGADE_NAME, A.WORK_TYPE_ID, B.TYPE_NAME\n" +
                 "FROM housing_service.brigade A\n" +
                 "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
@@ -126,7 +161,6 @@ public class MySQLBrigadeDao implements BrigadeDao {
 
         logger.debug("Try get BRIGADE by ID " + id);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -140,7 +174,7 @@ public class MySQLBrigadeDao implements BrigadeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return brigade;
@@ -151,11 +185,22 @@ public class MySQLBrigadeDao implements BrigadeDao {
      */
     @Override
     public boolean deleteBrigade(Brigade brigade) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = deleteBrigadeTransaction(brigade, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean deleteBrigadeTransaction(Brigade brigade, Connection con) {
         String SQL = "DELETE FROM housing_service.brigade WHERE BRIGADE_ID=?";
 
         logger.debug("Try delete BRIGADE " + brigade);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -167,7 +212,7 @@ public class MySQLBrigadeDao implements BrigadeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("BRIGADE delete fail " + brigade);
         return false;
@@ -178,11 +223,22 @@ public class MySQLBrigadeDao implements BrigadeDao {
      */
     @Override
     public boolean updateBrigade(Brigade brigade) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = updateBrigadeTransaction(brigade, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean updateBrigadeTransaction(Brigade brigade, Connection con) {
         String SQL = "UPDATE housing_service.brigade SET BRIGADE_NAME=?, WORK_TYPE_ID=? WHERE BRIGADE_ID=?";
 
         logger.debug("Try update BRIGADE " + brigade);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -203,7 +259,7 @@ public class MySQLBrigadeDao implements BrigadeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("BRIGADE update fail " + brigade);
         return false;
@@ -214,12 +270,23 @@ public class MySQLBrigadeDao implements BrigadeDao {
      */
     @Override
     public boolean insertBrigade(Brigade brigade) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = insertBrigadeTransaction(brigade, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean insertBrigadeTransaction(Brigade brigade, Connection con) {
         String SQL = "INSERT INTO housing_service.brigade (BRIGADE_NAME, WORK_TYPE_ID)  " +
                 "VALUES (?, ?)";
 
         logger.debug("Try insert BRIGADE " + brigade);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -244,7 +311,7 @@ public class MySQLBrigadeDao implements BrigadeDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("BRIGADE insert fail " + brigade);
         return false;

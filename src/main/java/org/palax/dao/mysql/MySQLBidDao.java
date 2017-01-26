@@ -2,6 +2,7 @@ package org.palax.dao.mysql;
 
 import org.apache.log4j.Logger;
 import org.palax.dao.BidDao;
+import org.palax.dao.transaction.TransactionBidDao;
 import org.palax.entity.*;
 import org.palax.utils.DataSourceManager;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * @author Taras Palashynskyy
  */
 
-public class MySQLBidDao implements BidDao {
+public class MySQLBidDao implements BidDao, TransactionBidDao {
     /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(MySQLBidDao.class);
 
@@ -72,6 +73,18 @@ public class MySQLBidDao implements BidDao {
      */
     @Override
     public List<Bid> getAllBid() {
+        Connection con = DataSourceManager.getConnection();
+        List<Bid> bidList = getAllBidTransaction(con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return bidList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Bid> getAllBidTransaction(Connection con) {
         String SQL = "SELECT A.BID_ID, A.WORK_TYPE_ID, B.TYPE_NAME, A.WORK_SCOPE, A.LEAD_TIME, " +
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
@@ -87,7 +100,6 @@ public class MySQLBidDao implements BidDao {
 
         logger.debug("Try get all BID");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -100,7 +112,7 @@ public class MySQLBidDao implements BidDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return bidList;
@@ -111,6 +123,18 @@ public class MySQLBidDao implements BidDao {
      */
     @Override
     public List<Bid> getAllBidByStatus(String status) {
+        Connection con = DataSourceManager.getConnection();
+        List<Bid> bidList = getAllBidByStatusTransaction(status, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return bidList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Bid> getAllBidByStatusTransaction(String status, Connection con) {
         String SQL = "SELECT A.BID_ID, A.WORK_TYPE_ID, B.TYPE_NAME, A.WORK_SCOPE, A.LEAD_TIME, " +
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
@@ -127,7 +151,6 @@ public class MySQLBidDao implements BidDao {
 
         logger.debug("Try get all BID by STATUS");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -141,7 +164,7 @@ public class MySQLBidDao implements BidDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return bidList;
@@ -152,6 +175,18 @@ public class MySQLBidDao implements BidDao {
      */
     @Override
     public List<Bid> getAllBidByUserTenant(Long id) {
+        Connection con = DataSourceManager.getConnection();
+        List<Bid> bidList = getAllBidByUserTenantTransaction(id, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return bidList;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Bid> getAllBidByUserTenantTransaction(Long id, Connection con) {
         String SQL = "SELECT A.BID_ID, A.WORK_TYPE_ID, B.TYPE_NAME, A.WORK_SCOPE, A.LEAD_TIME, " +
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
@@ -168,7 +203,6 @@ public class MySQLBidDao implements BidDao {
 
         logger.debug("Try get all BID by USER_ID");
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -182,7 +216,7 @@ public class MySQLBidDao implements BidDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return bidList;
@@ -193,6 +227,18 @@ public class MySQLBidDao implements BidDao {
      */
     @Override
     public Bid getBidById(Long id) {
+        Connection con = DataSourceManager.getConnection();
+        Bid bid = getBidByIdTransaction(id, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return bid;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Bid getBidByIdTransaction(Long id, Connection con) {
         String SQL = "SELECT A.BID_ID, A.WORK_TYPE_ID, B.TYPE_NAME, A.WORK_SCOPE, A.LEAD_TIME, " +
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
@@ -209,7 +255,6 @@ public class MySQLBidDao implements BidDao {
 
         logger.debug("Try get BID by ID " + id);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -223,7 +268,7 @@ public class MySQLBidDao implements BidDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
 
         return bid;
@@ -234,11 +279,22 @@ public class MySQLBidDao implements BidDao {
      */
     @Override
     public boolean deleteBid(Bid bid) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = deleteBidTransaction(bid, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean deleteBidTransaction(Bid bid, Connection con) {
         String SQL = "DELETE FROM housing_service.bid WHERE BID_ID=?";
 
         logger.debug("Try delete BID " + bid);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -250,7 +306,7 @@ public class MySQLBidDao implements BidDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("BID delete fail " + bid);
         return false;
@@ -261,13 +317,24 @@ public class MySQLBidDao implements BidDao {
      */
     @Override
     public boolean updateBid(Bid bid) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = updateBidTransaction(bid, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean updateBidTransaction(Bid bid, Connection con) {
         String SQL = "UPDATE housing_service.bid " +
                 "SET WORK_TYPE_ID=?, WORK_SCOPE=?, LEAD_TIME=?, USER_TENANT_ID=?, STATUS=?, DESCRIPTION=?, BID_TIME=? " +
                 "WHERE BID_ID=?";
 
         logger.debug("Try update BID " + bid);
 
-        Connection con = DataSourceManager.getConnection();
         PreparedStatement stm = null;
         try {
             stm = con.prepareStatement(SQL);
@@ -299,7 +366,7 @@ public class MySQLBidDao implements BidDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, null);
+            DataSourceManager.closeAll(null, stm, null);
         }
         logger.debug("BID update fail " + bid);
         return false;
@@ -310,11 +377,23 @@ public class MySQLBidDao implements BidDao {
      */
     @Override
     public boolean insertBid(Bid bid) {
+        Connection con = DataSourceManager.getConnection();
+        Boolean aBoolean = insertBidTransaction(bid, con);
+        DataSourceManager.closeAll(con, null, null);
+
+        return aBoolean;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean insertBidTransaction(Bid bid, Connection con) {
         String SQL = "INSERT INTO housing_service.bid (WORK_TYPE_ID, WORK_SCOPE, LEAD_TIME, USER_TENANT_ID, " +
                 "STATUS, DESCRIPTION, BID_TIME) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         logger.debug("Try insert BID " + bid);
-        Connection con = DataSourceManager.getConnection();
+
         PreparedStatement stm = null;
         ResultSet rs = null;
         try {
@@ -348,7 +427,7 @@ public class MySQLBidDao implements BidDao {
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         } finally {
-            DataSourceManager.closeAll(con, stm, rs);
+            DataSourceManager.closeAll(null, stm, rs);
         }
         logger.debug("BID insert fail " + bid);
         return false;
@@ -408,4 +487,5 @@ public class MySQLBidDao implements BidDao {
 
         return bidList;
     }
+
 }
