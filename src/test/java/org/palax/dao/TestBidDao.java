@@ -1,31 +1,31 @@
 package org.palax.dao;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.palax.dao.factory.MySQLDAOFactory;
+import org.palax.dao.util.DataGenerator;
+import org.palax.dao.util.InjectingJNDIDataSource;
+import org.palax.dao.util.TestDatabaseManager;
 import org.palax.entity.*;
 import org.palax.utils.DataSourceManager;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-
+import javax.naming.InitialContext;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 /**
  * The {@code TestBrigadeDao} is a test class which used to test {@link org.palax.dao.mysql.MySQLBidDao}
@@ -51,12 +51,19 @@ public class TestBidDao {
     }
 
     /**
+     * Set up method which inject {@link InitialContext} to the test environment
+     * alse create and fill database
+     */
+    @BeforeClass
+    public static void setUpClass() {
+        TestDatabaseManager.setUpTestDatabase();
+    }
+
+    /**
      * The method that checks whether the insertion of the {@link org.palax.entity.Bid} successfully in the DB
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -106,8 +113,6 @@ public class TestBidDao {
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -153,16 +158,14 @@ public class TestBidDao {
     }
 
     /**
-     * The method that checks successfuly gets all {@link Bid} from the DB
+     * The method that checks successfully gets all {@link Bid} from the DB
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
-    public void testCorrectGetAllBid() throws SQLException {
+    public void testGetAllBid() throws SQLException {
 
         List<Bid> expectedList = new ArrayList<>();
 
@@ -417,5 +420,331 @@ public class TestBidDao {
 
         assertEquals(actualList, expectedList);
 
+    }
+
+    /**
+     * The method that checks successfully gets all {@link Bid} by {@code status} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetAllBidByStatus() throws SQLException {
+
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        List<Bid> expectedList = new ArrayList<>();
+        Bid bid = new Bid();
+        bid.setBidId(3L);
+        WorkType workType = new WorkType();
+        bid.setWorkType(workType);
+        bid.getWorkType().setWorkTypeId(1L);
+        bid.getWorkType().setTypeName("work_type1");
+        bid.setWorkScope(3L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(3L);
+        bid.getUserTenant().setLogin("login3");
+        bid.getUserTenant().setPassword("passwd3");
+        bid.getUserTenant().setRole(new Role());
+        bid.getUserTenant().getRole().setRoleId(2L);
+        bid.getUserTenant().getRole().setRoleType("role2");
+        bid.getUserTenant().setFirstName("first_name3");
+        bid.getUserTenant().setLastName("last_name3");
+        bid.getUserTenant().setPosition("pos1");
+        bid.getUserTenant().setBrigade(new Brigade());
+        bid.getUserTenant().getBrigade().setBrigadeId(1L);
+        bid.getUserTenant().getBrigade().setBrigadeName("brigade1");
+        bid.getUserTenant().getBrigade().setWorkType(workType);
+        bid.getUserTenant().setStreet("str3");
+        bid.getUserTenant().setHouseNumber("3");
+        bid.getUserTenant().setApartment(3L);
+        bid.getUserTenant().setCity("city2");
+        bid.getUserTenant().setPhoneNumber("093-722-9394");
+        bid.setStatus("COMPLETE");
+        bid.setDescription("desc3");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        expectedList.add(bid);
+
+        bid = new Bid();
+        bid.setBidId(5L);
+        workType = new WorkType();
+        bid.setWorkType(workType);
+        bid.getWorkType().setWorkTypeId(4L);
+        bid.getWorkType().setTypeName("work_type4");
+        bid.setWorkScope(5L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(4L);
+        bid.getUserTenant().setLogin("login4");
+        bid.getUserTenant().setPassword("passwd4");
+        bid.getUserTenant().setRole(new Role());
+        bid.getUserTenant().getRole().setRoleId(2L);
+        bid.getUserTenant().getRole().setRoleType("role2");
+        bid.getUserTenant().setFirstName("first_name4");
+        bid.getUserTenant().setLastName("last_name4");
+        bid.getUserTenant().setPosition("pos2");
+        bid.getUserTenant().setBrigade(new Brigade());
+        bid.getUserTenant().getBrigade().setBrigadeId(1L);
+        bid.getUserTenant().getBrigade().setBrigadeName("brigade1");
+        workType = new WorkType();
+        bid.getUserTenant().getBrigade().setWorkType(workType);
+        bid.getUserTenant().getBrigade().getWorkType().setWorkTypeId(1L);
+        bid.getUserTenant().getBrigade().getWorkType().setTypeName("work_type1");
+        bid.getUserTenant().setStreet("str4");
+        bid.getUserTenant().setHouseNumber("4");
+        bid.getUserTenant().setApartment(4L);
+        bid.getUserTenant().setCity("city1");
+        bid.getUserTenant().setPhoneNumber("093-722-9395");
+        bid.setStatus("COMPLETE");
+        bid.setDescription("desc5");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        expectedList.add(bid);
+
+        BidDao bidDao = MySQLDAOFactory.getBidDao();
+
+        List<Bid> actualList = bidDao.getAllBidByStatus("COMPLETE");
+
+        assertEquals(expectedList, actualList);
+    }
+
+    /**
+     * The method that checks successfully gets all {@link Bid} by {@code userTenantId} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetAllBidByUserTenant() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        List<Bid> expectedList = new ArrayList<>();
+        Bid bid = new Bid();
+        bid.setBidId(1L);
+        WorkType workType = new WorkType();
+        bid.setWorkType(workType);
+        bid.getWorkType().setWorkTypeId(1L);
+        bid.getWorkType().setTypeName("work_type1");
+        bid.setWorkScope(1L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(1L);
+        bid.getUserTenant().setLogin("login1");
+        bid.getUserTenant().setPassword("passwd1");
+        bid.getUserTenant().setRole(new Role());
+        bid.getUserTenant().getRole().setRoleId(1L);
+        bid.getUserTenant().getRole().setRoleType("role1");
+        bid.getUserTenant().setFirstName("first_name1");
+        bid.getUserTenant().setLastName("last_name1");
+        bid.getUserTenant().setBrigade(new Brigade());
+        bid.getUserTenant().getBrigade().setWorkType(new WorkType());
+        bid.getUserTenant().setStreet("str1");
+        bid.getUserTenant().setHouseNumber("1");
+        bid.getUserTenant().setApartment(1L);
+        bid.getUserTenant().setCity("city1");
+        bid.getUserTenant().setPhoneNumber("093-722-9393");
+        bid.setStatus("NEW");
+        bid.setDescription("desc1");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        expectedList.add(bid);
+
+        bid = new Bid();
+        bid.setBidId(4L);
+        workType = new WorkType();
+        bid.setWorkType(workType);
+        bid.getWorkType().setWorkTypeId(3L);
+        bid.getWorkType().setTypeName("work_type3");
+        bid.setWorkScope(2L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(1L);
+        bid.getUserTenant().setLogin("login1");
+        bid.getUserTenant().setPassword("passwd1");
+        bid.getUserTenant().setRole(new Role());
+        bid.getUserTenant().getRole().setRoleId(1L);
+        bid.getUserTenant().getRole().setRoleType("role1");
+        bid.getUserTenant().setFirstName("first_name1");
+        bid.getUserTenant().setLastName("last_name1");
+        bid.getUserTenant().setBrigade(new Brigade());
+        bid.getUserTenant().getBrigade().setWorkType(new WorkType());
+        bid.getUserTenant().setStreet("str1");
+        bid.getUserTenant().setHouseNumber("1");
+        bid.getUserTenant().setApartment(1L);
+        bid.getUserTenant().setCity("city1");
+        bid.getUserTenant().setPhoneNumber("093-722-9393");
+        bid.setStatus("IN WORK");
+        bid.setDescription("desc4");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        expectedList.add(bid);
+
+        BidDao bidDao = MySQLDAOFactory.getBidDao();
+
+        List<Bid> actualList = bidDao.getAllBidByUserTenant(1L);
+
+        assertEquals(expectedList, actualList);
+    }
+
+    /**
+     * The method that checks successfully gets {@link Bid} by {@code id} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetBidById() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        Bid expectedBid = new Bid();
+        expectedBid.setBidId(1L);
+        WorkType workType = new WorkType();
+        expectedBid.setWorkType(workType);
+        expectedBid.getWorkType().setWorkTypeId(1L);
+        expectedBid.getWorkType().setTypeName("work_type1");
+        expectedBid.setWorkScope(1L);
+        expectedBid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        expectedBid.setUserTenant(new User());
+        expectedBid.getUserTenant().setUserId(1L);
+        expectedBid.getUserTenant().setLogin("login1");
+        expectedBid.getUserTenant().setPassword("passwd1");
+        expectedBid.getUserTenant().setRole(new Role());
+        expectedBid.getUserTenant().getRole().setRoleId(1L);
+        expectedBid.getUserTenant().getRole().setRoleType("role1");
+        expectedBid.getUserTenant().setFirstName("first_name1");
+        expectedBid.getUserTenant().setLastName("last_name1");
+        expectedBid.getUserTenant().setBrigade(new Brigade());
+        expectedBid.getUserTenant().getBrigade().setWorkType(new WorkType());
+        expectedBid.getUserTenant().setStreet("str1");
+        expectedBid.getUserTenant().setHouseNumber("1");
+        expectedBid.getUserTenant().setApartment(1L);
+        expectedBid.getUserTenant().setCity("city1");
+        expectedBid.getUserTenant().setPhoneNumber("093-722-9393");
+        expectedBid.setStatus("NEW");
+        expectedBid.setDescription("desc1");
+        expectedBid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+
+        BidDao bidDao = MySQLDAOFactory.getBidDao();
+
+        Bid actualBid = bidDao.getBidById(1L);
+
+        assertEquals(expectedBid, actualBid);
+    }
+
+    /**
+     * The method that checks successfully update {@link Bid} in the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testUpdateBid() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        Bid expectedBid = new Bid();
+        expectedBid.setBidId(1L);
+        WorkType workType = new WorkType();
+        expectedBid.setWorkType(workType);
+        expectedBid.getWorkType().setWorkTypeId(1L);
+        expectedBid.getWorkType().setTypeName("work_type1");
+        expectedBid.setWorkScope(1L);
+        expectedBid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        expectedBid.setUserTenant(new User());
+        expectedBid.getUserTenant().setUserId(1L);
+        expectedBid.getUserTenant().setLogin("login1");
+        expectedBid.getUserTenant().setPassword("passwd1");
+        expectedBid.getUserTenant().setRole(new Role());
+        expectedBid.getUserTenant().getRole().setRoleId(1L);
+        expectedBid.getUserTenant().getRole().setRoleType("role1");
+        expectedBid.getUserTenant().setFirstName("first_name1");
+        expectedBid.getUserTenant().setLastName("last_name1");
+        expectedBid.getUserTenant().setBrigade(new Brigade());
+        expectedBid.getUserTenant().getBrigade().setWorkType(new WorkType());
+        expectedBid.getUserTenant().setStreet("str1");
+        expectedBid.getUserTenant().setHouseNumber("1");
+        expectedBid.getUserTenant().setApartment(1L);
+        expectedBid.getUserTenant().setCity("city1");
+        expectedBid.getUserTenant().setPhoneNumber("093-722-9393");
+        expectedBid.setStatus("UPDATE");
+        expectedBid.setDescription("desc1");
+        expectedBid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+
+        BidDao bidDao = MySQLDAOFactory.getBidDao();
+
+        assertTrue(bidDao.updateBid(expectedBid));
+
+        Bid actualBid = bidDao.getBidById(1L);
+
+        assertEquals(expectedBid, actualBid);
+    }
+
+    /**
+     * The method that checks successfully delete {@link Bid} by {@code id} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testDeleteBid() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        Bid bid = new Bid();
+        bid.setBidId(2L);
+        WorkType workType = new WorkType();
+        bid.setWorkType(workType);
+        bid.getWorkType().setWorkTypeId(1L);
+        bid.setWorkScope(2L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(2L);
+        bid.setStatus("IN WORK");
+        bid.setDescription("desc2");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+
+        BidDao bidDao = MySQLDAOFactory.getBidDao();
+
+        assertTrue(bidDao.deleteBid(bid));
+
+        Bid actualBid = bidDao.getBidById(2L);
+
+        assertNull(actualBid);
     }
 }

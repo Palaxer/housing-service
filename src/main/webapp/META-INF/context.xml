@@ -4,7 +4,7 @@
               auth="Container"
               type="javax.sql.DataSource"
               maxActive="100"
-              maxIdle="30"
+              maxIdle="60"
               maxWait="10000"
               username="root"
               password="root"

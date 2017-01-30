@@ -89,12 +89,12 @@ public class MySQLBidDao implements BidDao, TransactionBidDao {
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
                 "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME, C.PHONE_NUMBER " +
-                "FROM housing_service.bid A " +
-                "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
-                "LEFT JOIN housing_service.user C ON (A.USER_TENANT_ID=C.USER_ID) " +
-                "LEFT JOIN housing_service.role D ON (C.ROLE_ID=D.ROLE_ID) " +
-                "LEFT JOIN housing_service.brigade E ON (C.BRIGADE_ID=E.BRIGADE_ID) " +
-                "LEFT JOIN housing_service.work_type F ON (E.WORK_TYPE_ID=F.WORK_TYPE_ID)";
+                "FROM bid A " +
+                "LEFT JOIN work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
+                "LEFT JOIN user C ON (A.USER_TENANT_ID=C.USER_ID) " +
+                "LEFT JOIN role D ON (C.ROLE_ID=D.ROLE_ID) " +
+                "LEFT JOIN brigade E ON (C.BRIGADE_ID=E.BRIGADE_ID) " +
+                "LEFT JOIN work_type F ON (E.WORK_TYPE_ID=F.WORK_TYPE_ID)";
 
         List<Bid> bidList = null;
 
@@ -139,12 +139,12 @@ public class MySQLBidDao implements BidDao, TransactionBidDao {
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
                 "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME, C.PHONE_NUMBER " +
-                "FROM housing_service.bid A " +
-                "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
-                "LEFT JOIN housing_service.user C ON (A.USER_TENANT_ID=C.USER_ID) " +
-                "LEFT JOIN housing_service.role D ON (C.ROLE_ID=D.ROLE_ID) " +
-                "LEFT JOIN housing_service.brigade E ON (C.BRIGADE_ID=E.BRIGADE_ID) " +
-                "LEFT JOIN housing_service.work_type F ON (E.WORK_TYPE_ID=F.WORK_TYPE_ID)" +
+                "FROM bid A " +
+                "LEFT JOIN work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
+                "LEFT JOIN user C ON (A.USER_TENANT_ID=C.USER_ID) " +
+                "LEFT JOIN role D ON (C.ROLE_ID=D.ROLE_ID) " +
+                "LEFT JOIN brigade E ON (C.BRIGADE_ID=E.BRIGADE_ID) " +
+                "LEFT JOIN work_type F ON (E.WORK_TYPE_ID=F.WORK_TYPE_ID)" +
                 "WHERE A.STATUS=?";
 
         List<Bid> bidList = new ArrayList<>();
@@ -191,12 +191,12 @@ public class MySQLBidDao implements BidDao, TransactionBidDao {
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
                 "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME, C.PHONE_NUMBER " +
-                "FROM housing_service.bid A " +
-                "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
-                "LEFT JOIN housing_service.user C ON (A.USER_TENANT_ID=C.USER_ID) " +
-                "LEFT JOIN housing_service.role D ON (C.ROLE_ID=D.ROLE_ID) " +
-                "LEFT JOIN housing_service.brigade E ON (C.BRIGADE_ID=E.BRIGADE_ID) " +
-                "LEFT JOIN housing_service.work_type F ON (E.WORK_TYPE_ID=F.WORK_TYPE_ID) " +
+                "FROM bid A " +
+                "LEFT JOIN work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
+                "LEFT JOIN user C ON (A.USER_TENANT_ID=C.USER_ID) " +
+                "LEFT JOIN role D ON (C.ROLE_ID=D.ROLE_ID) " +
+                "LEFT JOIN brigade E ON (C.BRIGADE_ID=E.BRIGADE_ID) " +
+                "LEFT JOIN work_type F ON (E.WORK_TYPE_ID=F.WORK_TYPE_ID) " +
                 "WHERE A.USER_TENANT_ID=?";
 
         List<Bid> bidList = new ArrayList<>();
@@ -243,12 +243,12 @@ public class MySQLBidDao implements BidDao, TransactionBidDao {
                 "A.USER_TENANT_ID, C.LOGIN, C.PASSWD, C.ROLE_ID, D.ROLE_TYPE, C.FIRST_NAME," +
                 "C.LAST_NAME, C.POSITION, C.BRIGADE_ID, E.BRIGADE_NAME, E.WORK_TYPE_ID, " +
                 "F.TYPE_NAME, C.STREET, C.HOUSE_NUMBER, C.APARTMENT, C.CITY, A.STATUS, A.DESCRIPTION, A.BID_TIME, C.PHONE_NUMBER " +
-                "FROM housing_service.bid A " +
-                "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
-                "LEFT JOIN housing_service.user C ON (A.USER_TENANT_ID=C.USER_ID) " +
-                "LEFT JOIN housing_service.role D ON (C.ROLE_ID=D.ROLE_ID) " +
-                "LEFT JOIN housing_service.brigade E ON (C.BRIGADE_ID=E.BRIGADE_ID) " +
-                "LEFT JOIN housing_service.work_type F ON (E.WORK_TYPE_ID=F.WORK_TYPE_ID) " +
+                "FROM bid A " +
+                "LEFT JOIN work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
+                "LEFT JOIN user C ON (A.USER_TENANT_ID=C.USER_ID) " +
+                "LEFT JOIN role D ON (C.ROLE_ID=D.ROLE_ID) " +
+                "LEFT JOIN brigade E ON (C.BRIGADE_ID=E.BRIGADE_ID) " +
+                "LEFT JOIN work_type F ON (E.WORK_TYPE_ID=F.WORK_TYPE_ID) " +
                 "WHERE A.BID_ID=?";
 
         Bid bid = null;
@@ -262,7 +262,8 @@ public class MySQLBidDao implements BidDao, TransactionBidDao {
             stm.setLong(1, id);
             rs = stm.executeQuery();
 
-            bid = parseResultSet(rs).get(0);
+            List<Bid> bidList = parseResultSet(rs);
+            bid = bidList.isEmpty() ? null : bidList.get(0);
 
             logger.debug("Get BID by ID successfully " + bid);
         } catch (SQLException e) {
@@ -291,7 +292,7 @@ public class MySQLBidDao implements BidDao, TransactionBidDao {
      */
     @Override
     public boolean deleteBidTransaction(Bid bid, Connection con) {
-        String SQL = "DELETE FROM housing_service.bid WHERE BID_ID=?";
+        String SQL = "DELETE FROM bid WHERE BID_ID=?";
 
         logger.debug("Try delete BID " + bid);
 
@@ -329,7 +330,7 @@ public class MySQLBidDao implements BidDao, TransactionBidDao {
      */
     @Override
     public boolean updateBidTransaction(Bid bid, Connection con) {
-        String SQL = "UPDATE housing_service.bid " +
+        String SQL = "UPDATE bid " +
                 "SET WORK_TYPE_ID=?, WORK_SCOPE=?, LEAD_TIME=?, USER_TENANT_ID=?, STATUS=?, DESCRIPTION=?, BID_TIME=? " +
                 "WHERE BID_ID=?";
 
@@ -389,7 +390,7 @@ public class MySQLBidDao implements BidDao, TransactionBidDao {
      */
     @Override
     public boolean insertBidTransaction(Bid bid, Connection con) {
-        String SQL = "INSERT INTO housing_service.bid (WORK_TYPE_ID, WORK_SCOPE, LEAD_TIME, USER_TENANT_ID, " +
+        String SQL = "INSERT INTO bid (WORK_TYPE_ID, WORK_SCOPE, LEAD_TIME, USER_TENANT_ID, " +
                 "STATUS, DESCRIPTION, BID_TIME) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         logger.debug("Try insert BID " + bid);
@@ -438,7 +439,6 @@ public class MySQLBidDao implements BidDao, TransactionBidDao {
      *
      * @param rs {@link ResultSet} which be persed
      * @return parse {@code rs} and return {@link List} of {@link Bid}
-     * @throws SQLException {@link SQLException}
      */
     private List<Bid> parseResultSet(ResultSet rs) throws SQLException {
         List<Bid> bidList = new ArrayList<>();

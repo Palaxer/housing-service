@@ -1,20 +1,23 @@
 package org.palax.dao;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.palax.dao.factory.MySQLDAOFactory;
+import org.palax.dao.util.DataGenerator;
+import org.palax.dao.util.InjectingJNDIDataSource;
+import org.palax.dao.util.TestDatabaseManager;
 import org.palax.entity.Brigade;
-import org.palax.entity.Role;
 import org.palax.entity.WorkType;
 import org.palax.utils.DataSourceManager;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-
+import javax.naming.InitialContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,14 +25,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 /**
  * The {@code TestBrigadeDao} is a test class which used to test {@link org.palax.dao.mysql.MySQLBrigadeDao}
@@ -55,12 +54,19 @@ public class TestBrigadeDao {
     }
 
     /**
+     * Set up method which inject {@link InitialContext} to the test environment
+     * alse create and fill database
+     */
+    @BeforeClass
+    public static void setUpClass() {
+        TestDatabaseManager.setUpTestDatabase();
+    }
+
+    /**
      * The method that checks whether the insertion of the {@link org.palax.entity.Brigade} successfully in the DB
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -99,8 +105,6 @@ public class TestBrigadeDao {
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -135,12 +139,10 @@ public class TestBrigadeDao {
     }
 
     /**
-     * The method that checks successfuly gets all {@link Brigade} from the DB
+     * The method that checks successfully gets all {@link Brigade} from the DB
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -206,6 +208,152 @@ public class TestBrigadeDao {
         verify(mockResultSet, times(3)).getString(4);
 
         assertEquals(actualList, expectedList);
-
     }
+
+    /**
+     * The method that checks successfully gets all {@link Brigade} by {@code workType} name from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetAllBrigadeByWorkType() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                   Connection con = InjectingJNDIDataSource.getConnection();
+                   con.setCatalog("housing_service_test");
+                    return con;
+                });
+
+        List<Brigade> expectedList = new ArrayList<>();
+        Brigade brigade = new Brigade();
+        brigade.setBrigadeId(1L);
+        brigade.setBrigadeName("brigade1");
+        WorkType workType= new WorkType();
+        brigade.setWorkType(workType);
+        brigade.getWorkType().setWorkTypeId(1L);
+        brigade.getWorkType().setTypeName("work_type1");
+        expectedList.add(brigade);
+
+        brigade = new Brigade();
+        brigade.setBrigadeId(2L);
+        brigade.setBrigadeName("brigade2");
+        workType= new WorkType();
+        brigade.setWorkType(workType);
+        brigade.getWorkType().setWorkTypeId(1L);
+        brigade.getWorkType().setTypeName("work_type1");
+        expectedList.add(brigade);
+
+        BrigadeDao brigadeDao = MySQLDAOFactory.getBrigadeDao();
+
+        List<Brigade> actualList = brigadeDao.getAllBrigadeByWorkType(workType.getTypeName());
+
+        assertEquals(expectedList, actualList);
+    }
+
+    /**
+     * The method that checks successfully gets all {@link Brigade} by {@code id} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetBrigadeById() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return con;
+                });
+
+        Brigade expectedBrigade = new Brigade();
+        expectedBrigade.setBrigadeId(1L);
+        expectedBrigade.setBrigadeName("brigade1");
+        WorkType workType= new WorkType();
+        expectedBrigade.setWorkType(workType);
+        expectedBrigade.getWorkType().setWorkTypeId(1L);
+        expectedBrigade.getWorkType().setTypeName("work_type1");
+
+        BrigadeDao brigadeDao = MySQLDAOFactory.getBrigadeDao();
+
+        Brigade actualBrigade = brigadeDao.getBrigadeById(1L);
+
+        assertEquals(expectedBrigade, actualBrigade);
+    }
+
+    /**
+     * The method that checks successfully update {@link Brigade} in the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testUpdateBrigade() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return con;
+                });
+
+        Brigade expectedBrigade = new Brigade();
+        expectedBrigade.setBrigadeId(1L);
+        expectedBrigade.setBrigadeName("update");
+        WorkType workType= new WorkType();
+        expectedBrigade.setWorkType(workType);
+        expectedBrigade.getWorkType().setWorkTypeId(1L);
+        expectedBrigade.getWorkType().setTypeName("work_type1");
+
+        BrigadeDao brigadeDao = MySQLDAOFactory.getBrigadeDao();
+
+        assertTrue(brigadeDao.updateBrigade(expectedBrigade));
+
+        Brigade actualBrigade = brigadeDao.getBrigadeById(1L);
+
+        assertEquals(expectedBrigade, actualBrigade);
+    }
+
+    /**
+     * The method that checks successfully delete {@link Brigade} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testDeleteBrigade() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return con;
+                });
+
+        Brigade brigade = new Brigade();
+        brigade.setBrigadeId(6L);
+        brigade.setBrigadeName("brigade6");
+        WorkType workType= new WorkType();
+        brigade.setWorkType(workType);
+        brigade.getWorkType().setWorkTypeId(4L);
+        brigade.getWorkType().setTypeName("work_type4");
+
+        BrigadeDao brigadeDao = MySQLDAOFactory.getBrigadeDao();
+
+        assertTrue(brigadeDao.deleteBrigade(brigade));
+
+        assertNull(brigadeDao.getBrigadeById(6L));
+    }
+
+
 }

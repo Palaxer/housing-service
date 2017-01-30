@@ -65,8 +65,8 @@ public class MySQLBrigadeDao implements BrigadeDao, TransactionBrigadeDao {
     @Override
     public List<Brigade> getAllBrigadeTransaction(Connection con){
         String SQL = "SELECT A.BRIGADE_ID, A.BRIGADE_NAME, A.WORK_TYPE_ID, B.TYPE_NAME " +
-                "FROM housing_service.brigade A " +
-                "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID)";
+                "FROM brigade A " +
+                "LEFT JOIN work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID)";
 
         List<Brigade> brigadeList = null;
 
@@ -108,8 +108,8 @@ public class MySQLBrigadeDao implements BrigadeDao, TransactionBrigadeDao {
     @Override
     public List<Brigade> getAllBrigadeByWorkTypeTransaction(String workType, Connection con) {
         String SQL = "SELECT A.BRIGADE_ID, A.BRIGADE_NAME, A.WORK_TYPE_ID, B.TYPE_NAME " +
-                "FROM housing_service.brigade A " +
-                "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
+                "FROM brigade A " +
+                "LEFT JOIN work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
                 "WHERE B.TYPE_NAME=?";
 
         List<Brigade> brigadeList = null;
@@ -153,8 +153,8 @@ public class MySQLBrigadeDao implements BrigadeDao, TransactionBrigadeDao {
     @Override
     public Brigade getBrigadeByIdTransaction(Long id, Connection con) {
         String SQL = "SELECT A.BRIGADE_ID, A.BRIGADE_NAME, A.WORK_TYPE_ID, B.TYPE_NAME\n" +
-                "FROM housing_service.brigade A\n" +
-                "LEFT JOIN housing_service.work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
+                "FROM brigade A\n" +
+                "LEFT JOIN work_type B ON (A.WORK_TYPE_ID=B.WORK_TYPE_ID) " +
                 "WHERE A.BRIGADE_ID=?";
 
         Brigade brigade = null;
@@ -168,7 +168,8 @@ public class MySQLBrigadeDao implements BrigadeDao, TransactionBrigadeDao {
             stm.setLong(1, id);
             rs = stm.executeQuery();
 
-            brigade = parseResultSet(rs).get(0);
+            List<Brigade> brigadeList = parseResultSet(rs);
+            brigade = brigadeList.isEmpty() ? null : brigadeList.get(0);
 
             logger.debug("Get BRIGADE by ID successfully " + brigade);
         } catch (SQLException e) {
@@ -197,7 +198,7 @@ public class MySQLBrigadeDao implements BrigadeDao, TransactionBrigadeDao {
      */
     @Override
     public boolean deleteBrigadeTransaction(Brigade brigade, Connection con) {
-        String SQL = "DELETE FROM housing_service.brigade WHERE BRIGADE_ID=?";
+        String SQL = "DELETE FROM brigade WHERE BRIGADE_ID=?";
 
         logger.debug("Try delete BRIGADE " + brigade);
 
@@ -235,7 +236,7 @@ public class MySQLBrigadeDao implements BrigadeDao, TransactionBrigadeDao {
      */
     @Override
     public boolean updateBrigadeTransaction(Brigade brigade, Connection con) {
-        String SQL = "UPDATE housing_service.brigade SET BRIGADE_NAME=?, WORK_TYPE_ID=? WHERE BRIGADE_ID=?";
+        String SQL = "UPDATE brigade SET BRIGADE_NAME=?, WORK_TYPE_ID=? WHERE BRIGADE_ID=?";
 
         logger.debug("Try update BRIGADE " + brigade);
 
@@ -282,7 +283,7 @@ public class MySQLBrigadeDao implements BrigadeDao, TransactionBrigadeDao {
      */
     @Override
     public boolean insertBrigadeTransaction(Brigade brigade, Connection con) {
-        String SQL = "INSERT INTO housing_service.brigade (BRIGADE_NAME, WORK_TYPE_ID)  " +
+        String SQL = "INSERT INTO brigade (BRIGADE_NAME, WORK_TYPE_ID)  " +
                 "VALUES (?, ?)";
 
         logger.debug("Try insert BRIGADE " + brigade);
@@ -322,7 +323,6 @@ public class MySQLBrigadeDao implements BrigadeDao, TransactionBrigadeDao {
      *
      * @param rs {@link ResultSet} which be persed
      * @return parse {@code rs} and return {@link List} of {@link Brigade}
-     * @throws SQLException {@link SQLException}
      */
     private List<Brigade> parseResultSet(ResultSet rs) throws SQLException {
         List<Brigade> brigadeList = new ArrayList<>();

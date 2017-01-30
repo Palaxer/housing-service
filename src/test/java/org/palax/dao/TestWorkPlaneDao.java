@@ -1,5 +1,6 @@
 package org.palax.dao;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -9,27 +10,25 @@ import org.palax.dao.factory.MySQLDAOFactory;
 import org.palax.dao.mysql.MySQLBidDao;
 import org.palax.dao.mysql.MySQLBrigadeDao;
 import org.palax.dao.mysql.MySQLUserDao;
+import org.palax.dao.util.DataGenerator;
+import org.palax.dao.util.InjectingJNDIDataSource;
+import org.palax.dao.util.TestDatabaseManager;
 import org.palax.entity.*;
 import org.palax.utils.DataSourceManager;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-
+import javax.naming.InitialContext;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 /**
  * The {@code TestBrigadeDao} is a test class which used to test {@link org.palax.dao.mysql.MySQLWorkPlaneDao}
@@ -61,12 +60,19 @@ public class TestWorkPlaneDao {
     }
 
     /**
+     * Set up method which inject {@link InitialContext} to the test environment
+     * alse create and fill database
+     */
+    @BeforeClass
+    public static void setUpClass() {
+        TestDatabaseManager.setUpTestDatabase();
+    }
+
+    /**
      * The method that checks whether the insertion of the {@link org.palax.entity.WorkPlane} successfully in the DB
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -116,8 +122,6 @@ public class TestWorkPlaneDao {
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -165,8 +169,6 @@ public class TestWorkPlaneDao {
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class, MySQLDAOFactory.class})
     @Test
@@ -284,6 +286,609 @@ public class TestWorkPlaneDao {
         verify(mockResultSet, times(3)).getTimestamp(7);
 
         assertEquals(actualList, expectedList);
+    }
 
+    /**
+     * The method that checks successfully gets all {@link WorkPlane} by {@code workType} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetAllWorkPlaneByWorkType() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        List<WorkPlane> expectedList = new ArrayList<>();
+        WorkPlane workPlane = new WorkPlane();
+        workPlane.setWorkPlaneId(1L);
+        User user = new User();
+        user.setUserId(4L);
+        user.setLogin("login4");
+        user.setPassword("passwd4");
+        Role role = new Role();
+        user.setRole(role);
+        user.getRole().setRoleId(2L);
+        user.getRole().setRoleType("role2");
+        user.setFirstName("first_name4");
+        user.setLastName("last_name4");
+        user.setPosition("pos2");
+        Brigade brigade = new Brigade();
+        user.setBrigade(brigade);
+        user.getBrigade().setBrigadeId(1L);
+        user.getBrigade().setBrigadeName("brigade1");
+        WorkType workType = new WorkType();
+        user.getBrigade().setWorkType(workType);
+        user.getBrigade().getWorkType().setWorkTypeId(1L);
+        user.getBrigade().getWorkType().setTypeName("work_type1");
+        user.setStreet("str4");
+        user.setHouseNumber("4");
+        user.setApartment(4L);
+        user.setCity("city1");
+        user.setPhoneNumber("093-722-9395");
+        workPlane.setUserAdvisor(user);
+        workPlane.setBrigade(brigade);
+        Bid bid = new Bid();
+        bid.setBidId(3L);
+        bid.setWorkType(workType);
+        bid.setWorkScope(3L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(3L);
+        bid.getUserTenant().setLogin("login3");
+        bid.getUserTenant().setPassword("passwd3");
+        bid.getUserTenant().setRole(role);
+        bid.getUserTenant().setFirstName("first_name3");
+        bid.getUserTenant().setLastName("last_name3");
+        bid.getUserTenant().setPosition("pos1");
+        bid.getUserTenant().setBrigade(brigade);
+        bid.getUserTenant().setStreet("str3");
+        bid.getUserTenant().setHouseNumber("3");
+        bid.getUserTenant().setApartment(3L);
+        bid.getUserTenant().setCity("city2");
+        bid.getUserTenant().setPhoneNumber("093-722-9394");
+        bid.setStatus("COMPLETE");
+        bid.setDescription("desc3");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        workPlane.setBid(bid);
+        workPlane.setStatus("COMPLETE");
+        workPlane.setWorkTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        workPlane.setCompleteTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        expectedList.add(workPlane);
+
+        workPlane = new WorkPlane();
+        workPlane.setWorkPlaneId(2L);
+        user = new User();
+        user.setUserId(4L);
+        user.setLogin("login4");
+        user.setPassword("passwd4");
+        role = new Role();
+        user.setRole(role);
+        user.getRole().setRoleId(2L);
+        user.getRole().setRoleType("role2");
+        user.setFirstName("first_name4");
+        user.setLastName("last_name4");
+        user.setPosition("pos2");
+        brigade = new Brigade();
+        user.setBrigade(brigade);
+        user.getBrigade().setBrigadeId(1L);
+        user.getBrigade().setBrigadeName("brigade1");
+        workType = new WorkType();
+        user.getBrigade().setWorkType(workType);
+        user.getBrigade().getWorkType().setWorkTypeId(1L);
+        user.getBrigade().getWorkType().setTypeName("work_type1");
+        user.setStreet("str4");
+        user.setHouseNumber("4");
+        user.setApartment(4L);
+        user.setCity("city1");
+        user.setPhoneNumber("093-722-9395");
+        workPlane.setUserAdvisor(user);
+        workPlane.setBrigade(brigade);
+        bid = new Bid();
+        bid.setBidId(1L);
+        bid.setWorkType(workType);
+        bid.setWorkScope(1L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(1L);
+        bid.getUserTenant().setLogin("login1");
+        bid.getUserTenant().setPassword("passwd1");
+        bid.getUserTenant().setRole(new Role());
+        bid.getUserTenant().getRole().setRoleId(1L);
+        bid.getUserTenant().getRole().setRoleType("role1");
+        bid.getUserTenant().setFirstName("first_name1");
+        bid.getUserTenant().setLastName("last_name1");
+        bid.getUserTenant().setBrigade(new Brigade());
+        bid.getUserTenant().getBrigade().setWorkType(new WorkType());
+        bid.getUserTenant().setStreet("str1");
+        bid.getUserTenant().setHouseNumber("1");
+        bid.getUserTenant().setApartment(1L);
+        bid.getUserTenant().setCity("city1");
+        bid.getUserTenant().setPhoneNumber("093-722-9393");
+        bid.setStatus("NEW");
+        bid.setDescription("desc1");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        workPlane.setBid(bid);
+        workPlane.setStatus("NEW");
+        workPlane.setWorkTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        workPlane.setCompleteTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        expectedList.add(workPlane);
+
+
+        WorkPlaneDao workPlaneDao = MySQLDAOFactory.getWorkPlaneDao();
+
+        List<WorkPlane> actualList = workPlaneDao.getAllWorkPlaneByWorkType("work_type1");
+
+        assertEquals(expectedList, actualList);
+    }
+
+    /**
+     * The method that checks successfully gets all {@link WorkPlane} by {@code brigadeId} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetAllWorkPlaneByBrigadeId() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        List<WorkPlane> expectedList = new ArrayList<>();
+        WorkPlane workPlane = new WorkPlane();
+        workPlane.setWorkPlaneId(1L);
+        User user = new User();
+        user.setUserId(4L);
+        user.setLogin("login4");
+        user.setPassword("passwd4");
+        Role role = new Role();
+        user.setRole(role);
+        user.getRole().setRoleId(2L);
+        user.getRole().setRoleType("role2");
+        user.setFirstName("first_name4");
+        user.setLastName("last_name4");
+        user.setPosition("pos2");
+        Brigade brigade = new Brigade();
+        user.setBrigade(brigade);
+        user.getBrigade().setBrigadeId(1L);
+        user.getBrigade().setBrigadeName("brigade1");
+        WorkType workType = new WorkType();
+        user.getBrigade().setWorkType(workType);
+        user.getBrigade().getWorkType().setWorkTypeId(1L);
+        user.getBrigade().getWorkType().setTypeName("work_type1");
+        user.setStreet("str4");
+        user.setHouseNumber("4");
+        user.setApartment(4L);
+        user.setCity("city1");
+        user.setPhoneNumber("093-722-9395");
+        workPlane.setUserAdvisor(user);
+        workPlane.setBrigade(brigade);
+        Bid bid = new Bid();
+        bid.setBidId(3L);
+        bid.setWorkType(workType);
+        bid.setWorkScope(3L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(3L);
+        bid.getUserTenant().setLogin("login3");
+        bid.getUserTenant().setPassword("passwd3");
+        bid.getUserTenant().setRole(role);
+        bid.getUserTenant().setFirstName("first_name3");
+        bid.getUserTenant().setLastName("last_name3");
+        bid.getUserTenant().setPosition("pos1");
+        bid.getUserTenant().setBrigade(brigade);
+        bid.getUserTenant().setStreet("str3");
+        bid.getUserTenant().setHouseNumber("3");
+        bid.getUserTenant().setApartment(3L);
+        bid.getUserTenant().setCity("city2");
+        bid.getUserTenant().setPhoneNumber("093-722-9394");
+        bid.setStatus("COMPLETE");
+        bid.setDescription("desc3");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        workPlane.setBid(bid);
+        workPlane.setStatus("COMPLETE");
+        workPlane.setWorkTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        workPlane.setCompleteTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        expectedList.add(workPlane);
+
+        workPlane = new WorkPlane();
+        workPlane.setWorkPlaneId(2L);
+        user = new User();
+        user.setUserId(4L);
+        user.setLogin("login4");
+        user.setPassword("passwd4");
+        role = new Role();
+        user.setRole(role);
+        user.getRole().setRoleId(2L);
+        user.getRole().setRoleType("role2");
+        user.setFirstName("first_name4");
+        user.setLastName("last_name4");
+        user.setPosition("pos2");
+        brigade = new Brigade();
+        user.setBrigade(brigade);
+        user.getBrigade().setBrigadeId(1L);
+        user.getBrigade().setBrigadeName("brigade1");
+        workType = new WorkType();
+        user.getBrigade().setWorkType(workType);
+        user.getBrigade().getWorkType().setWorkTypeId(1L);
+        user.getBrigade().getWorkType().setTypeName("work_type1");
+        user.setStreet("str4");
+        user.setHouseNumber("4");
+        user.setApartment(4L);
+        user.setCity("city1");
+        user.setPhoneNumber("093-722-9395");
+        workPlane.setUserAdvisor(user);
+        workPlane.setBrigade(brigade);
+        bid = new Bid();
+        bid.setBidId(1L);
+        bid.setWorkType(workType);
+        bid.setWorkScope(1L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(1L);
+        bid.getUserTenant().setLogin("login1");
+        bid.getUserTenant().setPassword("passwd1");
+        bid.getUserTenant().setRole(new Role());
+        bid.getUserTenant().getRole().setRoleId(1L);
+        bid.getUserTenant().getRole().setRoleType("role1");
+        bid.getUserTenant().setFirstName("first_name1");
+        bid.getUserTenant().setLastName("last_name1");
+        bid.getUserTenant().setBrigade(new Brigade());
+        bid.getUserTenant().getBrigade().setWorkType(new WorkType());
+        bid.getUserTenant().setStreet("str1");
+        bid.getUserTenant().setHouseNumber("1");
+        bid.getUserTenant().setApartment(1L);
+        bid.getUserTenant().setCity("city1");
+        bid.getUserTenant().setPhoneNumber("093-722-9393");
+        bid.setStatus("NEW");
+        bid.setDescription("desc1");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        workPlane.setBid(bid);
+        workPlane.setStatus("NEW");
+        workPlane.setWorkTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        workPlane.setCompleteTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        expectedList.add(workPlane);
+
+
+        WorkPlaneDao workPlaneDao = MySQLDAOFactory.getWorkPlaneDao();
+
+        List<WorkPlane> actualList = workPlaneDao.getAllWorkPlaneByBrigadeId(1L);
+
+        assertEquals(expectedList, actualList);
+    }
+
+    /**
+     * The method that checks successfully gets all {@link WorkPlane} by {@code id} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetWorkPlaneById() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        WorkPlane expectedWorkPlane = new WorkPlane();
+        expectedWorkPlane.setWorkPlaneId(1L);
+        User user = new User();
+        user.setUserId(4L);
+        user.setLogin("login4");
+        user.setPassword("passwd4");
+        Role role = new Role();
+        user.setRole(role);
+        user.getRole().setRoleId(2L);
+        user.getRole().setRoleType("role2");
+        user.setFirstName("first_name4");
+        user.setLastName("last_name4");
+        user.setPosition("pos2");
+        Brigade brigade = new Brigade();
+        user.setBrigade(brigade);
+        user.getBrigade().setBrigadeId(1L);
+        user.getBrigade().setBrigadeName("brigade1");
+        WorkType workType = new WorkType();
+        user.getBrigade().setWorkType(workType);
+        user.getBrigade().getWorkType().setWorkTypeId(1L);
+        user.getBrigade().getWorkType().setTypeName("work_type1");
+        user.setStreet("str4");
+        user.setHouseNumber("4");
+        user.setApartment(4L);
+        user.setCity("city1");
+        user.setPhoneNumber("093-722-9395");
+        expectedWorkPlane.setUserAdvisor(user);
+        expectedWorkPlane.setBrigade(brigade);
+        Bid bid = new Bid();
+        bid.setBidId(3L);
+        bid.setWorkType(workType);
+        bid.setWorkScope(3L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(3L);
+        bid.getUserTenant().setLogin("login3");
+        bid.getUserTenant().setPassword("passwd3");
+        bid.getUserTenant().setRole(role);
+        bid.getUserTenant().setFirstName("first_name3");
+        bid.getUserTenant().setLastName("last_name3");
+        bid.getUserTenant().setPosition("pos1");
+        bid.getUserTenant().setBrigade(brigade);
+        bid.getUserTenant().setStreet("str3");
+        bid.getUserTenant().setHouseNumber("3");
+        bid.getUserTenant().setApartment(3L);
+        bid.getUserTenant().setCity("city2");
+        bid.getUserTenant().setPhoneNumber("093-722-9394");
+        bid.setStatus("COMPLETE");
+        bid.setDescription("desc3");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        expectedWorkPlane.setBid(bid);
+        expectedWorkPlane.setStatus("COMPLETE");
+        expectedWorkPlane.setWorkTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        expectedWorkPlane.setCompleteTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+
+        WorkPlaneDao workPlaneDao = MySQLDAOFactory.getWorkPlaneDao();
+
+        WorkPlane actualWorkPlane = workPlaneDao.getWorkPlaneById(1L);
+
+        assertEquals(expectedWorkPlane, actualWorkPlane);
+    }
+
+    /**
+     * The method that checks successfully gets all {@link WorkPlane} by {@code bidId} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetWorkPlaneByBidId() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        WorkPlane expectedWorkPlane = new WorkPlane();
+        expectedWorkPlane.setWorkPlaneId(1L);
+        User user = new User();
+        user.setUserId(4L);
+        user.setLogin("login4");
+        user.setPassword("passwd4");
+        Role role = new Role();
+        user.setRole(role);
+        user.getRole().setRoleId(2L);
+        user.getRole().setRoleType("role2");
+        user.setFirstName("first_name4");
+        user.setLastName("last_name4");
+        user.setPosition("pos2");
+        Brigade brigade = new Brigade();
+        user.setBrigade(brigade);
+        user.getBrigade().setBrigadeId(1L);
+        user.getBrigade().setBrigadeName("brigade1");
+        WorkType workType = new WorkType();
+        user.getBrigade().setWorkType(workType);
+        user.getBrigade().getWorkType().setWorkTypeId(1L);
+        user.getBrigade().getWorkType().setTypeName("work_type1");
+        user.setStreet("str4");
+        user.setHouseNumber("4");
+        user.setApartment(4L);
+        user.setCity("city1");
+        user.setPhoneNumber("093-722-9395");
+        expectedWorkPlane.setUserAdvisor(user);
+        expectedWorkPlane.setBrigade(brigade);
+        Bid bid = new Bid();
+        bid.setBidId(3L);
+        bid.setWorkType(workType);
+        bid.setWorkScope(3L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(3L);
+        bid.getUserTenant().setLogin("login3");
+        bid.getUserTenant().setPassword("passwd3");
+        bid.getUserTenant().setRole(role);
+        bid.getUserTenant().setFirstName("first_name3");
+        bid.getUserTenant().setLastName("last_name3");
+        bid.getUserTenant().setPosition("pos1");
+        bid.getUserTenant().setBrigade(brigade);
+        bid.getUserTenant().setStreet("str3");
+        bid.getUserTenant().setHouseNumber("3");
+        bid.getUserTenant().setApartment(3L);
+        bid.getUserTenant().setCity("city2");
+        bid.getUserTenant().setPhoneNumber("093-722-9394");
+        bid.setStatus("COMPLETE");
+        bid.setDescription("desc3");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        expectedWorkPlane.setBid(bid);
+        expectedWorkPlane.setStatus("COMPLETE");
+        expectedWorkPlane.setWorkTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        expectedWorkPlane.setCompleteTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+
+        WorkPlaneDao workPlaneDao = MySQLDAOFactory.getWorkPlaneDao();
+
+        WorkPlane actualWorkPlane = workPlaneDao.getWorkPlaneByBidId(3L);
+
+        assertEquals(expectedWorkPlane, actualWorkPlane);
+    }
+
+    /**
+     * The method that checks successfully delete {@link WorkPlane} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testDeleteWorkPlane() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        WorkPlane expectedWorkPlane = new WorkPlane();
+        expectedWorkPlane.setWorkPlaneId(1L);
+        User user = new User();
+        user.setUserId(4L);
+        user.setLogin("login4");
+        user.setPassword("passwd4");
+        Role role = new Role();
+        user.setRole(role);
+        user.getRole().setRoleId(2L);
+        user.getRole().setRoleType("role2");
+        user.setFirstName("first_name4");
+        user.setLastName("last_name4");
+        user.setPosition("pos2");
+        Brigade brigade = new Brigade();
+        user.setBrigade(brigade);
+        user.getBrigade().setBrigadeId(1L);
+        user.getBrigade().setBrigadeName("brigade1");
+        WorkType workType = new WorkType();
+        user.getBrigade().setWorkType(workType);
+        user.getBrigade().getWorkType().setWorkTypeId(1L);
+        user.getBrigade().getWorkType().setTypeName("work_type1");
+        user.setStreet("str4");
+        user.setHouseNumber("4");
+        user.setApartment(4L);
+        user.setCity("city1");
+        user.setPhoneNumber("093-722-9395");
+        expectedWorkPlane.setUserAdvisor(user);
+        expectedWorkPlane.setBrigade(brigade);
+        Bid bid = new Bid();
+        bid.setBidId(3L);
+        bid.setWorkType(workType);
+        bid.setWorkScope(3L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(3L);
+        bid.getUserTenant().setLogin("login3");
+        bid.getUserTenant().setPassword("passwd3");
+        bid.getUserTenant().setRole(role);
+        bid.getUserTenant().setFirstName("first_name3");
+        bid.getUserTenant().setLastName("last_name3");
+        bid.getUserTenant().setPosition("pos1");
+        bid.getUserTenant().setBrigade(brigade);
+        bid.getUserTenant().setStreet("str3");
+        bid.getUserTenant().setHouseNumber("3");
+        bid.getUserTenant().setApartment(3L);
+        bid.getUserTenant().setCity("city2");
+        bid.getUserTenant().setPhoneNumber("093-722-9394");
+        bid.setStatus("COMPLETE");
+        bid.setDescription("desc3");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        expectedWorkPlane.setBid(bid);
+        expectedWorkPlane.setStatus("UPDATE");
+        expectedWorkPlane.setWorkTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        expectedWorkPlane.setCompleteTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+
+        WorkPlaneDao workPlaneDao = MySQLDAOFactory.getWorkPlaneDao();
+
+        assertTrue(workPlaneDao.deleteWorkPlane(expectedWorkPlane));
+
+        assertNull(workPlaneDao.getWorkPlaneById(1L));
+    }
+
+    /**
+     * The method that checks successfully update {@link WorkPlane} in the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testUpdateWorkPlane() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        WorkPlane expectedWorkPlane = new WorkPlane();
+        expectedWorkPlane.setWorkPlaneId(1L);
+        User user = new User();
+        user.setUserId(4L);
+        user.setLogin("login4");
+        user.setPassword("passwd4");
+        Role role = new Role();
+        user.setRole(role);
+        user.getRole().setRoleId(2L);
+        user.getRole().setRoleType("role2");
+        user.setFirstName("first_name4");
+        user.setLastName("last_name4");
+        user.setPosition("pos2");
+        Brigade brigade = new Brigade();
+        user.setBrigade(brigade);
+        user.getBrigade().setBrigadeId(1L);
+        user.getBrigade().setBrigadeName("brigade1");
+        WorkType workType = new WorkType();
+        user.getBrigade().setWorkType(workType);
+        user.getBrigade().getWorkType().setWorkTypeId(1L);
+        user.getBrigade().getWorkType().setTypeName("work_type1");
+        user.setStreet("str4");
+        user.setHouseNumber("4");
+        user.setApartment(4L);
+        user.setCity("city1");
+        user.setPhoneNumber("093-722-9395");
+        expectedWorkPlane.setUserAdvisor(user);
+        expectedWorkPlane.setBrigade(brigade);
+        Bid bid = new Bid();
+        bid.setBidId(3L);
+        bid.setWorkType(workType);
+        bid.setWorkScope(3L);
+        bid.setLeadTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        bid.setUserTenant(new User());
+        bid.getUserTenant().setUserId(3L);
+        bid.getUserTenant().setLogin("login3");
+        bid.getUserTenant().setPassword("passwd3");
+        bid.getUserTenant().setRole(role);
+        bid.getUserTenant().setFirstName("first_name3");
+        bid.getUserTenant().setLastName("last_name3");
+        bid.getUserTenant().setPosition("pos1");
+        bid.getUserTenant().setBrigade(brigade);
+        bid.getUserTenant().setStreet("str3");
+        bid.getUserTenant().setHouseNumber("3");
+        bid.getUserTenant().setApartment(3L);
+        bid.getUserTenant().setCity("city2");
+        bid.getUserTenant().setPhoneNumber("093-722-9394");
+        bid.setStatus("COMPLETE");
+        bid.setDescription("desc3");
+        bid.setBidTime(Timestamp.valueOf(LocalDateTime.of(2016,12,12,0,0,0)));
+        expectedWorkPlane.setBid(bid);
+        expectedWorkPlane.setStatus("UPDATE");
+        expectedWorkPlane.setWorkTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+        expectedWorkPlane.setCompleteTime(Timestamp.valueOf(LocalDateTime.of(2016, 12, 12, 0, 0, 0)));
+
+        WorkPlaneDao workPlaneDao = MySQLDAOFactory.getWorkPlaneDao();
+
+        assertTrue(workPlaneDao.updateWorkPlane(expectedWorkPlane));
+
+        WorkPlane actualWorkPlane = workPlaneDao.getWorkPlaneById(1L);
+
+        assertEquals(expectedWorkPlane, actualWorkPlane);
     }
 }

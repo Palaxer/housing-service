@@ -70,7 +70,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
      */
     @Override
     public List<WorkPlane> getAllWorkPlaneTransaction(Connection con) {
-        String SQL = "SELECT * FROM housing_service.work_plane";
+        String SQL = "SELECT * FROM work_plane";
 
         List<WorkPlane> workPlaneList = null;
 
@@ -112,9 +112,9 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
     @Override
     public List<WorkPlane> getAllWorkPlaneByWorkTypeTransaction(String workType, Connection con) {
         String SQL = "SELECT A.WORK_PLANE_ID, A.USER_ADVISOR_ID, A.BRIGADE_ID, A.BID_ID, A.STATUS, A.WORK_TIME, A.COMPLETE_TIME " +
-                "FROM housing_service.work_plane A " +
-                "LEFT JOIN housing_service.brigade B ON (A.BRIGADE_ID=B.BRIGADE_ID) " +
-                "LEFT JOIN housing_service.work_type C ON (B.WORK_TYPE_ID=C.WORK_TYPE_ID) " +
+                "FROM work_plane A " +
+                "LEFT JOIN brigade B ON (A.BRIGADE_ID=B.BRIGADE_ID) " +
+                "LEFT JOIN work_type C ON (B.WORK_TYPE_ID=C.WORK_TYPE_ID) " +
                 "WHERE C.TYPE_NAME=?";
 
         List<WorkPlane> workPlaneList = null;
@@ -158,7 +158,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
     @Override
     public List<WorkPlane> getAllWorkPlaneByBrigadeIdTransaction(Long id, Connection con) {
         String SQL = "SELECT A.WORK_PLANE_ID, A.USER_ADVISOR_ID, A.BRIGADE_ID, A.BID_ID, A.STATUS, A.WORK_TIME, A.COMPLETE_TIME " +
-                "FROM housing_service.work_plane A " +
+                "FROM work_plane A " +
                 "WHERE A.BRIGADE_ID=?";
 
         List<WorkPlane> workPlaneList = null;
@@ -201,7 +201,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
      */
     @Override
     public WorkPlane getWorkPlaneByIdTransaction(Long id, Connection con) {
-        String SQL = "SELECT * FROM housing_service.work_plane WHERE WORK_PLANE_ID=?";
+        String SQL = "SELECT * FROM work_plane WHERE WORK_PLANE_ID=?";
 
         WorkPlane workPlane = null;
 
@@ -214,7 +214,8 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
             stm.setLong(1, id);
             rs = stm.executeQuery();
 
-            workPlane = parseResultSet(rs).get(0);
+            List<WorkPlane> workPlaneList = parseResultSet(rs);
+            workPlane = workPlaneList.isEmpty() ? null : workPlaneList.get(0);
 
             logger.debug("Get WORK_PLANE by ID successfully " + workPlane);
         } catch (SQLException e) {
@@ -243,7 +244,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
      */
     @Override
     public WorkPlane getWorkPlaneByBidIdTransaction(Long id, Connection con) {
-        String SQL = "SELECT * FROM housing_service.work_plane WHERE BID_ID=?";
+        String SQL = "SELECT * FROM work_plane WHERE BID_ID=?";
 
         WorkPlane workPlane = null;
 
@@ -256,7 +257,8 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
             stm.setLong(1, id);
             rs = stm.executeQuery();
 
-            workPlane = parseResultSet(rs).get(0);
+            List<WorkPlane> workPlaneList = parseResultSet(rs);
+            workPlane = workPlaneList.isEmpty() ? null : workPlaneList.get(0);
 
             logger.debug("Get WORK_PLANE by BID_ID successfully " + workPlane);
         } catch (SQLException e) {
@@ -285,7 +287,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
      */
     @Override
     public boolean deleteWorkPlaneTransaction(WorkPlane workPlane, Connection con) {
-        String SQL = "DELETE FROM housing_service.work_plane WHERE WORK_PLANE_ID=?";
+        String SQL = "DELETE FROM work_plane WHERE WORK_PLANE_ID=?";
 
         logger.debug("Try delete WORK_PLANE " + workPlane);
 
@@ -323,7 +325,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
      */
     @Override
     public boolean updateWorkPlaneTransaction(WorkPlane workPlane, Connection con) {
-        String SQL = "UPDATE housing_service.work_plane SET BRIGADE_ID=?, BID_ID=?, STATUS=?, USER_ADVISOR_ID=?," +
+        String SQL = "UPDATE work_plane SET BRIGADE_ID=?, BID_ID=?, STATUS=?, USER_ADVISOR_ID=?," +
                 " WORK_TIME=?, COMPLETE_TIME=? WHERE WORK_PLANE_ID=?";
 
         logger.debug("Try update WORK_PLANE " + workPlane);
@@ -384,7 +386,7 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
      */
     @Override
     public boolean insertWorkPlaneTransaction(WorkPlane workPlane, Connection con) {
-        String SQL = "INSERT INTO housing_service.work_plane (BRIGADE_ID, BID_ID, STATUS, USER_ADVISOR_ID, WORK_TIME," +
+        String SQL = "INSERT INTO work_plane (BRIGADE_ID, BID_ID, STATUS, USER_ADVISOR_ID, WORK_TIME," +
                 " COMPLETE_TIME) VALUES (?, ?, ?, ?, ?, ?)";
 
         logger.debug("Try insert WORK_PLANE " + workPlane);
@@ -436,7 +438,6 @@ public class MySQLWorkPlaneDao implements WorkPlaneDao, TransactionWorkPlaneDao 
      *
      * @param rs {@link ResultSet} which be persed
      * @return parse {@code rs} and return {@link List} of {@link WorkPlane}
-     * @throws SQLException {@link SQLException}
      */
     private List<WorkPlane> parseResultSet(ResultSet rs) throws SQLException {
         List<WorkPlane> workPlaneList = new ArrayList<>();

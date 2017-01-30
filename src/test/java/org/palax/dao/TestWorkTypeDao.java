@@ -1,19 +1,22 @@
 package org.palax.dao;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.palax.dao.factory.MySQLDAOFactory;
-import org.palax.entity.Role;
+import org.palax.dao.util.DataGenerator;
+import org.palax.dao.util.InjectingJNDIDataSource;
+import org.palax.dao.util.TestDatabaseManager;
 import org.palax.entity.WorkType;
 import org.palax.utils.DataSourceManager;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-
+import javax.naming.InitialContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,14 +24,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 /**
  * The {@code TestRoleDao} is a test class which used to test {@link org.palax.dao.mysql.MySQLWorkTypeDao}
@@ -54,12 +53,19 @@ public class TestWorkTypeDao {
     }
 
     /**
+     * Set up method which inject {@link InitialContext} to the test environment
+     * alse create and fill database
+     */
+    @BeforeClass
+    public static void setUpClass() {
+        TestDatabaseManager.setUpTestDatabase();
+    }
+
+    /**
      * The method that checks whether the insertion of the {@link org.palax.entity.WorkType} successfully in the DB
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -95,8 +101,6 @@ public class TestWorkTypeDao {
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -132,8 +136,6 @@ public class TestWorkTypeDao {
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -180,5 +182,123 @@ public class TestWorkTypeDao {
 
         assertEquals(actualList, expectedList);
 
+    }
+
+    /**
+     * The method that checks successfully gets all {@link WorkType} by {@code name} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetWorkTypeByName() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return con;
+                });
+
+        WorkType expectedWorkType = new WorkType();
+        expectedWorkType.setWorkTypeId(5L);
+        expectedWorkType.setTypeName("work_type5");
+
+        WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
+
+        WorkType actualWorkType = workTypeDao.getWorkTypeByName("work_type5");
+
+        assertEquals(expectedWorkType, actualWorkType);
+    }
+
+    /**
+     * The method that checks successfully gets all {@link WorkType} by {@code id} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetWorkTypeById() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return con;
+                });
+
+        WorkType expectedWorkType = new WorkType();
+        expectedWorkType.setWorkTypeId(5L);
+        expectedWorkType.setTypeName("work_type5");
+
+        WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
+
+        WorkType actualWorkType = workTypeDao.getWorkTypeById(5L);
+
+        assertEquals(expectedWorkType, actualWorkType);
+    }
+
+    /**
+     * The method that checks successfully update {@link WorkType} in the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testUpdateWorkType() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return con;
+                });
+
+        WorkType expectedWorkType = new WorkType();
+        expectedWorkType.setWorkTypeId(4L);
+        expectedWorkType.setTypeName("update");
+
+        WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
+
+        assertTrue(workTypeDao.updateWorkType(expectedWorkType));
+
+        WorkType actualWorkType = workTypeDao.getWorkTypeById(4L);
+
+        assertEquals(expectedWorkType, actualWorkType);
+    }
+
+    /**
+     * The method that checks successfully delete {@link WorkType} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testDeleteWorkType() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return con;
+                });
+
+        WorkType expectedWorkType = new WorkType();
+        expectedWorkType.setWorkTypeId(5L);
+        expectedWorkType.setTypeName("work_type5");
+
+        WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
+
+        assertTrue(workTypeDao.deleteWorkType(expectedWorkType));
+
+        assertNull(workTypeDao.getWorkTypeById(5L));
     }
 }

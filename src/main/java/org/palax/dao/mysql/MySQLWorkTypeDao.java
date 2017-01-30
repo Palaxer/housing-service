@@ -61,7 +61,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao, TransactionWorkTypeDao {
      */
     @Override
     public List<WorkType> getAllWorkTypeTransaction(Connection con) {
-        String SQL = "SELECT * FROM housing_service.work_type";
+        String SQL = "SELECT * FROM work_type";
 
         ArrayList<WorkType> workTypeList = new ArrayList<>();
         WorkType workType;
@@ -109,7 +109,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao, TransactionWorkTypeDao {
      */
     @Override
     public WorkType getWorkTypeByNameTransaction(String name, Connection con) {
-        String SQL = "SELECT * FROM housing_service.work_type WHERE TYPE_NAME=?";
+        String SQL = "SELECT * FROM work_type WHERE TYPE_NAME=?";
 
         WorkType workType = null;
 
@@ -155,7 +155,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao, TransactionWorkTypeDao {
      */
     @Override
     public WorkType getWorkTypeByIdTransaction(Long id, Connection con) {
-        String SQL = "SELECT * FROM housing_service.work_type WHERE WORK_TYPE_ID=?";
+        String SQL = "SELECT * FROM work_type WHERE WORK_TYPE_ID=?";
 
         WorkType workType = null;
 
@@ -201,7 +201,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao, TransactionWorkTypeDao {
      */
     @Override
     public boolean deleteWorkTypeTransaction(WorkType workType, Connection con) {
-        String SQL = "DELETE FROM housing_service.work_type WHERE WORK_TYPE_ID=?";
+        String SQL = "DELETE FROM work_type WHERE WORK_TYPE_ID=?";
 
         logger.debug("Try delete WORK_TYPE " + workType);
 
@@ -239,7 +239,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao, TransactionWorkTypeDao {
      */
     @Override
     public boolean updateWorkTypeTransaction(WorkType workType, Connection con) {
-        String SQL = "UPDATE housing_service.work_type SET TYPE_NAME=? WHERE WORK_TYPE_ID=?";
+        String SQL = "UPDATE work_type SET TYPE_NAME=? WHERE WORK_TYPE_ID=?";
 
         logger.debug("Try update WORK_TYPE " + workType);
 
@@ -278,7 +278,7 @@ public class MySQLWorkTypeDao implements WorkTypeDao, TransactionWorkTypeDao {
      */
     @Override
     public boolean insertWorkTypeTransaction(WorkType workType, Connection con) {
-        String SQL = "INSERT INTO housing_service.work_type (TYPE_NAME)  " +
+        String SQL = "INSERT INTO work_type (TYPE_NAME)  " +
                 "VALUES (?)";
 
         logger.debug("Try insert WORK_TYPE " + workType);

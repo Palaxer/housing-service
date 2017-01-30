@@ -61,7 +61,7 @@ public class MySQLRoleDao implements RoleDao, TransactionRoleDao {
      */
     @Override
     public List<Role> getAllRoleTransaction(Connection con) {
-        String SQL = "SELECT * FROM housing_service.role";
+        String SQL = "SELECT * FROM role";
 
         ArrayList<Role> roleList = new ArrayList<>();
         Role role;
@@ -109,7 +109,7 @@ public class MySQLRoleDao implements RoleDao, TransactionRoleDao {
      */
     @Override
     public Role getRoleByNameTransaction(String name, Connection con) {
-        String SQL = "SELECT * FROM housing_service.role WHERE ROLE_TYPE=?";
+        String SQL = "SELECT * FROM role WHERE ROLE_TYPE=?";
         Role role = null;
 
         logger.debug("Try get ROLE by NAME " + name);
@@ -154,7 +154,7 @@ public class MySQLRoleDao implements RoleDao, TransactionRoleDao {
      */
     @Override
     public Role getRoleByIdTransaction(Long id, Connection con) {
-        String SQL = "SELECT * FROM housing_service.role WHERE ROLE_ID=?";
+        String SQL = "SELECT * FROM role WHERE ROLE_ID=?";
         Role role = null;
 
         logger.debug("Try get ROLE by ID " + id);
@@ -199,7 +199,7 @@ public class MySQLRoleDao implements RoleDao, TransactionRoleDao {
      */
     @Override
     public boolean deleteRoleTransaction(Role role, Connection con) {
-        String SQL = "DELETE FROM housing_service.role WHERE ROLE_ID=?";
+        String SQL = "DELETE FROM role WHERE ROLE_ID=?";
 
         logger.debug("Try delete ROLE " + role);
 
@@ -237,7 +237,7 @@ public class MySQLRoleDao implements RoleDao, TransactionRoleDao {
      */
     @Override
     public boolean updateRoleTransaction(Role role, Connection con) {
-        String SQL = "UPDATE housing_service.role SET ROLE_TYPE=? WHERE ROLE_ID=?";
+        String SQL = "UPDATE role SET ROLE_TYPE=? WHERE ROLE_ID=?";
 
         logger.debug("Try update ROLE " + role);
 
@@ -276,7 +276,7 @@ public class MySQLRoleDao implements RoleDao, TransactionRoleDao {
      */
     @Override
     public boolean insertRoleTransaction(Role role, Connection con) {
-        String SQL = "INSERT INTO housing_service.role (ROLE_TYPE)  " +
+        String SQL = "INSERT INTO role (ROLE_TYPE)  " +
                 "VALUES (?)";
 
         logger.debug("Try insert ROLE " + role);

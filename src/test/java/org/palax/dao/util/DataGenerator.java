@@ -1,4 +1,4 @@
-package org.palax.dao;
+package org.palax.dao.util;
 
 import org.palax.entity.*;
 
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * @author Taras Palashynskyy
  */
 
-class DataGenerator {
+public class DataGenerator {
 
     /**
      * Generate {@link Role} instance with the filled all field
@@ -19,7 +19,7 @@ class DataGenerator {
      * @param template {@code template} will be set in all fields
      * @return fill {@link Role} instance
      */
-    static Role generateRole(long template) {
+    public static Role generateRole(long template) {
         Role role = new Role();
         role.setRoleId(template);
         role.setRoleType("role" + template);
@@ -33,7 +33,7 @@ class DataGenerator {
      * @param template {@code template} will be set in all fields
      * @return fill {@link WorkType} instance
      */
-    static WorkType generateWorkType(long template) {
+    public static WorkType generateWorkType(long template) {
         WorkType workType = new WorkType();
         workType.setWorkTypeId(template);
         workType.setTypeName("work type" + template);
@@ -47,7 +47,7 @@ class DataGenerator {
      * @param template {@code template} will be set in all fields
      * @return fill {@link Brigade} instance
      */
-    static Brigade generateBrigade(long template) {
+    public static Brigade generateBrigade(long template) {
         Brigade brigade = new Brigade();
         brigade.setBrigadeId(template);
         brigade.setBrigadeName("brigade" + template);
@@ -62,7 +62,7 @@ class DataGenerator {
      * @param template {@code template} will be set in all fields
      * @return fill {@link User} instance
      */
-    static User generateUser(long template) {
+    public static User generateUser(long template) {
         User user = new User();
         user.setUserId(template);
         user.setLogin("login" + template);
@@ -87,7 +87,7 @@ class DataGenerator {
      * @param template {@code template} will be set in all fields
      * @return fill {@link Bid} instance
      */
-    static Bid generateBid(long template) {
+    public static Bid generateBid(long template) {
         Bid bid = new Bid();
 
         bid.setBidId(template);
@@ -108,7 +108,7 @@ class DataGenerator {
      * @param template {@code template} will be set in all fields
      * @return fill {@link WorkPlane} instance
      */
-    static WorkPlane generateWorkPlane(long template) {
+    public static WorkPlane generateWorkPlane(long template) {
         WorkPlane workPlane = new WorkPlane();
 
         workPlane.setBrigade(DataGenerator.generateBrigade(template));

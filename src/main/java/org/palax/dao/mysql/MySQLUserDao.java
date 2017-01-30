@@ -82,10 +82,10 @@ public class MySQLUserDao implements UserDao, TransactionUserDao {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
                 "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
-                "FROM housing_service.user A " +
-                "LEFT JOIN housing_service.role B ON (A.ROLE_ID=B.ROLE_ID) " +
-                "LEFT JOIN housing_service.brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
-                "LEFT JOIN housing_service.work_type D ON (C.WORK_TYPE_ID=D.WORK_TYPE_ID)";
+                "FROM user A " +
+                "LEFT JOIN role B ON (A.ROLE_ID=B.ROLE_ID) " +
+                "LEFT JOIN brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
+                "LEFT JOIN work_type D ON (C.WORK_TYPE_ID=D.WORK_TYPE_ID)";
 
         List<User> userList = null;
 
@@ -129,10 +129,10 @@ public class MySQLUserDao implements UserDao, TransactionUserDao {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
                 "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
-                "FROM housing_service.user A " +
-                "LEFT JOIN housing_service.role B ON (A.ROLE_ID=B.ROLE_ID) " +
-                "LEFT JOIN housing_service.brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
-                "LEFT JOIN housing_service.work_type D ON (C.WORK_TYPE_ID=D.WORK_TYPE_ID) " +
+                "FROM user A " +
+                "LEFT JOIN role B ON (A.ROLE_ID=B.ROLE_ID) " +
+                "LEFT JOIN brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
+                "LEFT JOIN work_type D ON (C.WORK_TYPE_ID=D.WORK_TYPE_ID) " +
                 "WHERE A.BRIGADE_ID=?";
 
         List<User> userList = null;
@@ -178,10 +178,10 @@ public class MySQLUserDao implements UserDao, TransactionUserDao {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
                 "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
-                "FROM housing_service.user A " +
-                "LEFT JOIN housing_service.role B ON (A.ROLE_ID=B.ROLE_ID) " +
-                "LEFT JOIN housing_service.brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
-                "LEFT JOIN housing_service.work_type D ON (C.WORK_TYPE_ID=D.WORK_TYPE_ID) " +
+                "FROM user A " +
+                "LEFT JOIN role B ON (A.ROLE_ID=B.ROLE_ID) " +
+                "LEFT JOIN brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
+                "LEFT JOIN work_type D ON (C.WORK_TYPE_ID=D.WORK_TYPE_ID) " +
                 "WHERE A.USER_ID=?";
 
         User user = null;
@@ -228,10 +228,10 @@ public class MySQLUserDao implements UserDao, TransactionUserDao {
         String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
                 "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
                 "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
-                "FROM housing_service.user A " +
-                "LEFT JOIN housing_service.role B ON (A.ROLE_ID=B.ROLE_ID) " +
-                "LEFT JOIN housing_service.brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
-                "LEFT JOIN housing_service.work_type D ON (C.WORK_TYPE_ID=D.WORK_TYPE_ID) " +
+                "FROM user A " +
+                "LEFT JOIN role B ON (A.ROLE_ID=B.ROLE_ID) " +
+                "LEFT JOIN brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
+                "LEFT JOIN work_type D ON (C.WORK_TYPE_ID=D.WORK_TYPE_ID) " +
                 "WHERE A.LOGIN=?";
 
         User user = null;
@@ -275,7 +275,7 @@ public class MySQLUserDao implements UserDao, TransactionUserDao {
      */
     @Override
     public boolean deleteUserTransaction(User user, Connection con) {
-        String SQL = "DELETE FROM housing_service.user WHERE USER_ID=?";
+        String SQL = "DELETE FROM user WHERE USER_ID=?";
 
         logger.debug("Try delete USER " + user);
 
@@ -313,7 +313,7 @@ public class MySQLUserDao implements UserDao, TransactionUserDao {
      */
     @Override
     public boolean updateUserTransaction(User user, Connection con) {
-        String SQL = "UPDATE housing_service.user SET LOGIN=?, PASSWD=?, ROLE_ID=?, FIRST_NAME=?, LAST_NAME=?, POSITION=?," +
+        String SQL = "UPDATE user SET LOGIN=?, PASSWD=?, ROLE_ID=?, FIRST_NAME=?, LAST_NAME=?, POSITION=?," +
                 " BRIGADE_ID=?, STREET=?, HOUSE_NUMBER=?, APARTMENT=?, CITY=?, PHONE_NUMBER=? WHERE USER_ID=?";
 
         logger.debug("Try update USER " + user);
@@ -340,8 +340,8 @@ public class MySQLUserDao implements UserDao, TransactionUserDao {
             stm.setString(9, user.getHouseNumber());
             stm.setLong(10, user.getApartment());
             stm.setString(11, user.getCity());
-            stm.setLong(12, user.getUserId());
-            stm.setString(13, user.getPhoneNumber());
+            stm.setString(12, user.getPhoneNumber());
+            stm.setLong(13, user.getUserId());
             if(stm.executeUpdate() > 0) {
                 logger.debug("USER update successfully " + user);
                 return true;
@@ -375,7 +375,7 @@ public class MySQLUserDao implements UserDao, TransactionUserDao {
      */
     @Override
     public boolean insertUserTransaction(User user, Connection con) {
-        String SQL = "INSERT INTO housing_service.user (LOGIN, PASSWD, ROLE_ID, FIRST_NAME, LAST_NAME, POSITION," +
+        String SQL = "INSERT INTO user (LOGIN, PASSWD, ROLE_ID, FIRST_NAME, LAST_NAME, POSITION," +
                 " BRIGADE_ID, STREET, HOUSE_NUMBER, APARTMENT, CITY, PHONE_NUMBER) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         logger.debug("Try insert USER " + user);
@@ -430,7 +430,6 @@ public class MySQLUserDao implements UserDao, TransactionUserDao {
      *
      * @param rs {@link ResultSet} which be persed
      * @return parse {@code rs} and return {@link List} of {@link User}
-     * @throws SQLException {@link SQLException}
      */
     private List<User> parseResultSet(ResultSet rs) throws SQLException {
         List<User> userList = new ArrayList<>();

@@ -1,31 +1,36 @@
 package org.palax.dao;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.palax.dao.factory.MySQLDAOFactory;
-import org.palax.entity.*;
+import org.palax.dao.util.DataGenerator;
+import org.palax.dao.util.InjectingJNDIDataSource;
+import org.palax.dao.util.TestDatabaseManager;
+import org.palax.entity.Brigade;
+import org.palax.entity.Role;
+import org.palax.entity.User;
+import org.palax.entity.WorkType;
 import org.palax.utils.DataSourceManager;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-
-import java.sql.*;
-import java.time.LocalDateTime;
+import javax.naming.InitialContext;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 /**
  * The {@code TestBrigadeDao} is a test class which used to test {@link org.palax.dao.mysql.MySQLUserDao}
@@ -51,12 +56,19 @@ public class TestUserDao {
     }
 
     /**
+     * Set up method which inject {@link InitialContext} to the test environment
+     * alse create and fill database
+     */
+    @BeforeClass
+    public static void setUpClass() {
+        TestDatabaseManager.setUpTestDatabase();
+    }
+
+    /**
      * The method that checks whether the insertion of the {@link org.palax.entity.User} successfully in the DB
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -117,8 +129,6 @@ public class TestUserDao {
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -178,8 +188,6 @@ public class TestUserDao {
      * In this case we use {@link PowerMockito} for replacement behavior
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
-     *
-     * @throws SQLException {@link SQLException}
      */
     @PrepareForTest({DataSourceManager.class})
     @Test
@@ -364,6 +372,263 @@ public class TestUserDao {
         verify(mockResultSet, times(3)).getString(17);
 
         assertEquals(actualList, expectedList);
+    }
 
+    /**
+     * The method that checks successfully gets all {@link User} by {@code brigadeId} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetAllUserByBrigadeId() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        List<User> expectedList = new ArrayList<>();
+        User user = new User();
+        WorkType workType = new WorkType();
+        workType.setWorkTypeId(1L);
+        workType.setTypeName("work_type1");
+        user.setUserId(3L);
+        user.setLogin("login3");
+        user.setPassword("passwd3");
+        user.setRole(new Role());
+        user.getRole().setRoleId(2L);
+        user.getRole().setRoleType("role2");
+        user.setFirstName("first_name3");
+        user.setLastName("last_name3");
+        Brigade brigade = new Brigade();
+        user.setBrigade(brigade);
+        user.getBrigade().setBrigadeId(1L);
+        user.getBrigade().setBrigadeName("brigade1");
+        user.getBrigade().setWorkType(workType);
+        user.setStreet("str3");
+        user.setPosition("pos1");
+        user.setHouseNumber("3");
+        user.setApartment(3L);
+        user.setCity("city2");
+        user.setPhoneNumber("093-722-9394");
+        expectedList.add(user);
+
+        user = new User();
+        user.setUserId(4L);
+        user.setLogin("login4");
+        user.setPassword("passwd4");
+        user.setRole(new Role());
+        user.getRole().setRoleId(2L);
+        user.getRole().setRoleType("role2");
+        user.setFirstName("first_name4");
+        user.setLastName("last_name4");
+        user.setBrigade(brigade);
+        user.setStreet("str4");
+        user.setPosition("pos2");
+        user.setHouseNumber("4");
+        user.setApartment(4L);
+        user.setCity("city1");
+        user.setPhoneNumber("093-722-9395");
+        expectedList.add(user);
+
+        UserDao userDao = MySQLDAOFactory.getUserDao();
+
+        List<User> actualList = userDao.getAllUserByBrigadeId(1L);
+
+        assertEquals(expectedList, actualList);
+    }
+
+    /**
+     * The method that checks successfully get {@link User} by {@code id} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetUserById() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        User expectedUser = new User();
+        WorkType workType = new WorkType();
+        workType.setWorkTypeId(1L);
+        workType.setTypeName("work_type1");
+        expectedUser.setUserId(3L);
+        expectedUser.setLogin("login3");
+        expectedUser.setPassword("passwd3");
+        expectedUser.setRole(new Role());
+        expectedUser.getRole().setRoleId(2L);
+        expectedUser.getRole().setRoleType("role2");
+        expectedUser.setFirstName("first_name3");
+        expectedUser.setLastName("last_name3");
+        Brigade brigade = new Brigade();
+        expectedUser.setBrigade(brigade);
+        expectedUser.getBrigade().setBrigadeId(1L);
+        expectedUser.getBrigade().setBrigadeName("brigade1");
+        expectedUser.getBrigade().setWorkType(workType);
+        expectedUser.setStreet("str3");
+        expectedUser.setPosition("pos1");
+        expectedUser.setHouseNumber("3");
+        expectedUser.setApartment(3L);
+        expectedUser.setCity("city2");
+        expectedUser.setPhoneNumber("093-722-9394");
+
+        UserDao userDao = MySQLDAOFactory.getUserDao();
+
+        User actualUser = userDao.getUserById(3L);
+
+        assertEquals(expectedUser, actualUser);
+    }
+
+    /**
+     * The method that checks successfully get {@link User} by {@code login} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testGetUserByLogin() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        User expectedUser = new User();
+        WorkType workType = new WorkType();
+        workType.setWorkTypeId(1L);
+        workType.setTypeName("work_type1");
+        expectedUser.setUserId(3L);
+        expectedUser.setLogin("login3");
+        expectedUser.setPassword("passwd3");
+        expectedUser.setRole(new Role());
+        expectedUser.getRole().setRoleId(2L);
+        expectedUser.getRole().setRoleType("role2");
+        expectedUser.setFirstName("first_name3");
+        expectedUser.setLastName("last_name3");
+        Brigade brigade = new Brigade();
+        expectedUser.setBrigade(brigade);
+        expectedUser.getBrigade().setBrigadeId(1L);
+        expectedUser.getBrigade().setBrigadeName("brigade1");
+        expectedUser.getBrigade().setWorkType(workType);
+        expectedUser.setStreet("str3");
+        expectedUser.setPosition("pos1");
+        expectedUser.setHouseNumber("3");
+        expectedUser.setApartment(3L);
+        expectedUser.setCity("city2");
+        expectedUser.setPhoneNumber("093-722-9394");
+
+        UserDao userDao = MySQLDAOFactory.getUserDao();
+
+        User actualUser = userDao.getUserByLogin("login3");
+
+        assertEquals(expectedUser, actualUser);
+    }
+
+    /**
+     * The method that checks successfully update {@link User} in the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testUpdateUser() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        User expectedUser = new User();
+        WorkType workType = new WorkType();
+        workType.setWorkTypeId(1L);
+        workType.setTypeName("work_type1");
+        expectedUser.setUserId(3L);
+        expectedUser.setLogin("update");
+        expectedUser.setPassword("passwd3");
+        expectedUser.setRole(new Role());
+        expectedUser.getRole().setRoleId(2L);
+        expectedUser.getRole().setRoleType("role2");
+        expectedUser.setFirstName("first_name3");
+        expectedUser.setLastName("last_name3");
+        Brigade brigade = new Brigade();
+        expectedUser.setBrigade(brigade);
+        expectedUser.getBrigade().setBrigadeId(1L);
+        expectedUser.getBrigade().setBrigadeName("brigade1");
+        expectedUser.getBrigade().setWorkType(workType);
+        expectedUser.setStreet("str3");
+        expectedUser.setPosition("pos1");
+        expectedUser.setHouseNumber("3");
+        expectedUser.setApartment(3L);
+        expectedUser.setCity("city2");
+        expectedUser.setPhoneNumber("093-722-9394");
+
+        UserDao userDao = MySQLDAOFactory.getUserDao();
+
+        assertTrue(userDao.updateUser(expectedUser));
+
+        User actualUser = userDao.getUserById(3L);
+
+        assertEquals(expectedUser, actualUser);
+    }
+
+    /**
+     * The method that checks successfully delete {@link User} from the DB
+     * In this case we use {@link PowerMockito} for replacement behavior
+     * with utility static method {@code DataSourceManager.getConnection()} because
+     * there is no opportunity to use the DI
+     */
+    @PrepareForTest({DataSourceManager.class})
+    @Test
+    public void testDeleteUser() {
+        PowerMockito.mockStatic(DataSourceManager.class);
+
+        PowerMockito.when(DataSourceManager.getConnection())
+                .thenAnswer(invocationOnMock -> {
+                    Connection con = InjectingJNDIDataSource.getConnection();
+                    con.setCatalog("housing_service_test");
+                    return  con;
+                });
+
+        User expectedUser = new User();
+        expectedUser.setUserId(7L);
+        expectedUser.setLogin("login7");
+        expectedUser.setPassword("passwd3");
+        expectedUser.setRole(new Role());
+        expectedUser.getRole().setRoleId(2L);
+        expectedUser.getRole().setRoleType("role2");
+        expectedUser.setFirstName("first_name7");
+        expectedUser.setLastName("last_name7");
+        expectedUser.setStreet("str7");
+        expectedUser.setHouseNumber("7");
+        expectedUser.setApartment(7L);
+        expectedUser.setCity("city2");
+        expectedUser.setPhoneNumber("093-722-9394");
+
+        UserDao userDao = MySQLDAOFactory.getUserDao();
+
+        assertTrue(userDao.deleteUser(expectedUser));
+
+        assertNull(userDao.getUserById(7L));
     }
 }
