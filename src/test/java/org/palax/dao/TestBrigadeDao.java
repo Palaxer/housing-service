@@ -7,9 +7,7 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.palax.dao.factory.MySQLDAOFactory;
-import org.palax.dao.util.DataGenerator;
-import org.palax.dao.util.InjectingJNDIDataSource;
-import org.palax.dao.util.TestDatabaseManager;
+import org.palax.dao.util.*;
 import org.palax.entity.Brigade;
 import org.palax.entity.WorkType;
 import org.palax.utils.DataSourceManager;
@@ -35,7 +33,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Taras Palashynskyy
  */
-
+@PrepareForTest({DataSourceManager.class})
 @RunWith(PowerMockRunner.class)
 public class TestBrigadeDao {
 
@@ -48,10 +46,6 @@ public class TestBrigadeDao {
     /**Mock {@link ResultSet} object for test */
     @Mock
     private ResultSet mockResultSet;
-
-    public TestBrigadeDao() {
-
-    }
 
     /**
      * Set up method which inject {@link InitialContext} to the test environment
@@ -68,7 +62,6 @@ public class TestBrigadeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testCorrectInsertBrigade() throws SQLException {
 
@@ -82,10 +75,7 @@ public class TestBrigadeDao {
 
         BrigadeDao brigadeDao = MySQLDAOFactory.getBrigadeDao();
 
-        Brigade brigade = new Brigade();
-        brigade.setBrigadeName("brigade");
-        brigade.setWorkType(new WorkType());
-        brigade.getWorkType().setWorkTypeId(1L);
+        Brigade brigade = DataGenerator.generateBrigade(1);
 
         assertTrue(brigadeDao.insertBrigade(brigade));
 
@@ -106,7 +96,6 @@ public class TestBrigadeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testIncorrectInsertBrigade() throws SQLException {
 
@@ -120,10 +109,8 @@ public class TestBrigadeDao {
 
         BrigadeDao brigadeDao = MySQLDAOFactory.getBrigadeDao();
 
-        Brigade brigade = new Brigade();
-        brigade.setBrigadeName("brigade");
-        brigade.setWorkType(new WorkType());
-        brigade.getWorkType().setWorkTypeId(1L);
+        Brigade brigade = DataGenerator.generateBrigade(1);
+        brigade.setBrigadeId(null);
 
         assertFalse(brigadeDao.insertBrigade(brigade));
 
@@ -134,7 +121,7 @@ public class TestBrigadeDao {
         verify(mockResultSet, times(0)).next();
         verify(mockResultSet, times(0)).getLong(1);
 
-        assertEquals(brigade.getBrigadeId(), null);
+        assertNull(brigade.getBrigadeId());
 
     }
 
@@ -144,7 +131,6 @@ public class TestBrigadeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testCorrectGetAllBrigade() throws SQLException {
 
@@ -216,7 +202,6 @@ public class TestBrigadeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testGetAllBrigadeByWorkType() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -228,28 +213,18 @@ public class TestBrigadeDao {
                     return con;
                 });
 
+        Builder<WorkType> workTypeBuilder = WorkTypeBuilder.getBuilder().constructWorkType(1L);
+
         List<Brigade> expectedList = new ArrayList<>();
-        Brigade brigade = new Brigade();
-        brigade.setBrigadeId(1L);
-        brigade.setBrigadeName("brigade1");
-        WorkType workType= new WorkType();
-        brigade.setWorkType(workType);
-        brigade.getWorkType().setWorkTypeId(1L);
-        brigade.getWorkType().setTypeName("work_type1");
+        Brigade brigade = BrigadeBuilder.getBuilder().constructBrigade(1L, workTypeBuilder).build();
         expectedList.add(brigade);
 
-        brigade = new Brigade();
-        brigade.setBrigadeId(2L);
-        brigade.setBrigadeName("brigade2");
-        workType= new WorkType();
-        brigade.setWorkType(workType);
-        brigade.getWorkType().setWorkTypeId(1L);
-        brigade.getWorkType().setTypeName("work_type1");
+        brigade = BrigadeBuilder.getBuilder().constructBrigade(2L, workTypeBuilder).build();
         expectedList.add(brigade);
 
         BrigadeDao brigadeDao = MySQLDAOFactory.getBrigadeDao();
 
-        List<Brigade> actualList = brigadeDao.getAllBrigadeByWorkType(workType.getTypeName());
+        List<Brigade> actualList = brigadeDao.getAllBrigadeByWorkType("work_type1");
 
         assertEquals(expectedList, actualList);
     }
@@ -260,7 +235,6 @@ public class TestBrigadeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testGetBrigadeById() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -293,7 +267,6 @@ public class TestBrigadeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testUpdateBrigade() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -306,18 +279,18 @@ public class TestBrigadeDao {
                 });
 
         Brigade expectedBrigade = new Brigade();
-        expectedBrigade.setBrigadeId(1L);
+        expectedBrigade.setBrigadeId(7L);
         expectedBrigade.setBrigadeName("update");
         WorkType workType= new WorkType();
         expectedBrigade.setWorkType(workType);
-        expectedBrigade.getWorkType().setWorkTypeId(1L);
-        expectedBrigade.getWorkType().setTypeName("work_type1");
+        expectedBrigade.getWorkType().setWorkTypeId(2L);
+        expectedBrigade.getWorkType().setTypeName("work_type2");
 
         BrigadeDao brigadeDao = MySQLDAOFactory.getBrigadeDao();
 
         assertTrue(brigadeDao.updateBrigade(expectedBrigade));
 
-        Brigade actualBrigade = brigadeDao.getBrigadeById(1L);
+        Brigade actualBrigade = brigadeDao.getBrigadeById(7L);
 
         assertEquals(expectedBrigade, actualBrigade);
     }
@@ -328,7 +301,6 @@ public class TestBrigadeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testDeleteBrigade() {
         PowerMockito.mockStatic(DataSourceManager.class);

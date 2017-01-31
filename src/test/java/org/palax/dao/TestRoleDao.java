@@ -9,6 +9,7 @@ import org.mockito.stubbing.Answer;
 import org.palax.dao.factory.MySQLDAOFactory;
 import org.palax.dao.util.DataGenerator;
 import org.palax.dao.util.InjectingJNDIDataSource;
+import org.palax.dao.util.RoleBuilder;
 import org.palax.dao.util.TestDatabaseManager;
 import org.palax.entity.Role;
 import org.palax.utils.DataSourceManager;
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Taras Palashynskyy
  */
-
+@PrepareForTest({DataSourceManager.class})
 @RunWith(PowerMockRunner.class)
 public class TestRoleDao {
 
@@ -47,8 +48,6 @@ public class TestRoleDao {
     /**Mock {@link ResultSet} object for test */
     @Mock
     private ResultSet mockResultSet;
-
-    public TestRoleDao() {    }
 
     /**
      * Set up method which inject {@link InitialContext} to the test environment
@@ -65,7 +64,6 @@ public class TestRoleDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testCorrectInsertRole() throws SQLException {
 
@@ -79,8 +77,7 @@ public class TestRoleDao {
 
         RoleDao roleDao = MySQLDAOFactory.getRoleDao();
 
-        Role role = new Role();
-        role.setRoleType("role");
+        Role role = DataGenerator.generateRole(1);
 
         assertTrue(roleDao.insertRole(role));
 
@@ -100,7 +97,6 @@ public class TestRoleDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testIncorrectInsertRole() throws SQLException {
 
@@ -114,8 +110,8 @@ public class TestRoleDao {
 
         RoleDao roleDao = MySQLDAOFactory.getRoleDao();
 
-        Role role = new Role();
-        role.setRoleType("role");
+        Role role = DataGenerator.generateRole(1);
+        role.setRoleId(null);
 
         assertFalse(roleDao.insertRole(role));
 
@@ -125,7 +121,7 @@ public class TestRoleDao {
         verify(mockResultSet, times(0)).next();
         verify(mockResultSet, times(0)).getLong(1);
 
-        assertEquals(role.getRoleId(), null);
+        assertNull(role.getRoleId());
 
     }
 
@@ -135,7 +131,6 @@ public class TestRoleDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testCorrectGetAllRole() throws SQLException {
 
@@ -187,7 +182,6 @@ public class TestRoleDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testGetRoleByName() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -199,9 +193,7 @@ public class TestRoleDao {
                     return con;
                 });
 
-        Role expectedRole = new Role();
-        expectedRole.setRoleId(1L);
-        expectedRole.setRoleType("role1");
+        Role expectedRole = RoleBuilder.getBuilder().constructRole(1L).build();
 
         RoleDao roleDao = MySQLDAOFactory.getRoleDao();
 
@@ -216,7 +208,6 @@ public class TestRoleDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testGetRoleById() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -228,9 +219,7 @@ public class TestRoleDao {
                     return con;
                 });
 
-        Role expectedRole = new Role();
-        expectedRole.setRoleId(1L);
-        expectedRole.setRoleType("role1");
+        Role expectedRole = RoleBuilder.getBuilder().constructRole(1L).build();
 
         RoleDao roleDao = MySQLDAOFactory.getRoleDao();
 
@@ -245,7 +234,6 @@ public class TestRoleDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testUpdateRole() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -257,15 +245,14 @@ public class TestRoleDao {
                     return con;
                 });
 
-        Role expectedRole = new Role();
-        expectedRole.setRoleId(1L);
+        Role expectedRole = RoleBuilder.getBuilder().constructRole(6L).build();
         expectedRole.setRoleType("update");
 
         RoleDao roleDao = MySQLDAOFactory.getRoleDao();
 
         assertTrue(roleDao.updateRole(expectedRole));
 
-        Role actualRole = roleDao.getRoleById(1L);
+        Role actualRole = roleDao.getRoleById(6L);
 
         assertEquals(expectedRole, actualRole);
     }
@@ -276,7 +263,6 @@ public class TestRoleDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testDeleteRole() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -288,9 +274,7 @@ public class TestRoleDao {
                     return con;
                 });
 
-        Role expectedRole = new Role();
-        expectedRole.setRoleId(5L);
-        expectedRole.setRoleType("role5");
+        Role expectedRole = RoleBuilder.getBuilder().constructRole(5L).build();
 
         RoleDao roleDao = MySQLDAOFactory.getRoleDao();
 

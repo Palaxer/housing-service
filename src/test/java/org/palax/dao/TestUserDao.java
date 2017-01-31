@@ -7,9 +7,7 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.palax.dao.factory.MySQLDAOFactory;
-import org.palax.dao.util.DataGenerator;
-import org.palax.dao.util.InjectingJNDIDataSource;
-import org.palax.dao.util.TestDatabaseManager;
+import org.palax.dao.util.*;
 import org.palax.entity.Brigade;
 import org.palax.entity.Role;
 import org.palax.entity.User;
@@ -37,7 +35,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Taras Palashynskyy
  */
-
+@PrepareForTest({DataSourceManager.class})
 @RunWith(PowerMockRunner.class)
 public class TestUserDao {
 
@@ -50,10 +48,6 @@ public class TestUserDao {
     /**Mock {@link ResultSet} object for test */
     @Mock
     private ResultSet mockResultSet;
-
-    public TestUserDao() {
-
-    }
 
     /**
      * Set up method which inject {@link InitialContext} to the test environment
@@ -70,7 +64,6 @@ public class TestUserDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testCorrectInsertUser() throws SQLException {
 
@@ -84,21 +77,7 @@ public class TestUserDao {
 
         UserDao userDao = MySQLDAOFactory.getUserDao();
 
-        User user = new User();
-        user.setStreet("street");
-        user.setPassword("passwd");
-        user.setHouseNumber("10/2");
-        user.setLastName("last name");
-        user.setApartment(1L);
-        user.setCity("city");
-        user.setFirstName("first name");
-        user.setLogin("login");
-        user.setPosition("position");
-        user.setPhoneNumber("093-722-9393");
-        user.setRole(new Role());
-        user.getRole().setRoleId(1L);
-        user.setBrigade(new Brigade());
-        user.getBrigade().setBrigadeId(1L);
+        User user = DataGenerator.generateUser(1);
 
         assertTrue(userDao.insertUser(user));
 
@@ -130,7 +109,6 @@ public class TestUserDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testIncorrectInsertUser() throws SQLException {
 
@@ -144,21 +122,8 @@ public class TestUserDao {
 
         UserDao userDao = MySQLDAOFactory.getUserDao();
 
-        User user = new User();
-        user.setStreet("street");
-        user.setPassword("passwd");
-        user.setHouseNumber("10/2");
-        user.setLastName("last name");
-        user.setApartment(1L);
-        user.setCity("city");
-        user.setFirstName("first name");
-        user.setLogin("login");
-        user.setPosition("position");
-        user.setPhoneNumber("093-722-9393");
-        user.setRole(new Role());
-        user.getRole().setRoleId(1L);
-        user.setBrigade(new Brigade());
-        user.getBrigade().setBrigadeId(1L);
+        User user = DataGenerator.generateUser(1);
+        user.setUserId(null);
 
         assertFalse(userDao.insertUser(user));
 
@@ -179,7 +144,7 @@ public class TestUserDao {
         verify(mockResultSet, times(0)).next();
         verify(mockResultSet, times(0)).getLong(1);
 
-        assertEquals(user.getUserId(), null);
+        assertNull(user.getUserId());
 
     }
 
@@ -189,7 +154,6 @@ public class TestUserDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testCorrectGetAllUser() throws SQLException {
 
@@ -380,7 +344,6 @@ public class TestUserDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testGetAllUserByBrigadeId() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -393,47 +356,14 @@ public class TestUserDao {
                 });
 
         List<User> expectedList = new ArrayList<>();
-        User user = new User();
-        WorkType workType = new WorkType();
-        workType.setWorkTypeId(1L);
-        workType.setTypeName("work_type1");
-        user.setUserId(3L);
-        user.setLogin("login3");
-        user.setPassword("passwd3");
-        user.setRole(new Role());
-        user.getRole().setRoleId(2L);
-        user.getRole().setRoleType("role2");
-        user.setFirstName("first_name3");
-        user.setLastName("last_name3");
-        Brigade brigade = new Brigade();
-        user.setBrigade(brigade);
-        user.getBrigade().setBrigadeId(1L);
-        user.getBrigade().setBrigadeName("brigade1");
-        user.getBrigade().setWorkType(workType);
-        user.setStreet("str3");
-        user.setPosition("pos1");
-        user.setHouseNumber("3");
-        user.setApartment(3L);
-        user.setCity("city2");
-        user.setPhoneNumber("093-722-9394");
+        RoleBuilder roleBuilder = RoleBuilder.getBuilder().constructRole(2L);
+        WorkTypeBuilder workTypeBuilder = WorkTypeBuilder.getBuilder().constructWorkType(1L);
+        BrigadeBuilder brigadeBuilder = BrigadeBuilder.getBuilder().constructBrigade(1L, workTypeBuilder);
+
+        User user = UserBuilder.getBuilder().constructUser(3L, roleBuilder, brigadeBuilder).build();
         expectedList.add(user);
 
-        user = new User();
-        user.setUserId(4L);
-        user.setLogin("login4");
-        user.setPassword("passwd4");
-        user.setRole(new Role());
-        user.getRole().setRoleId(2L);
-        user.getRole().setRoleType("role2");
-        user.setFirstName("first_name4");
-        user.setLastName("last_name4");
-        user.setBrigade(brigade);
-        user.setStreet("str4");
-        user.setPosition("pos2");
-        user.setHouseNumber("4");
-        user.setApartment(4L);
-        user.setCity("city1");
-        user.setPhoneNumber("093-722-9395");
+        user = UserBuilder.getBuilder().constructUser(4L, roleBuilder, brigadeBuilder).build();
         expectedList.add(user);
 
         UserDao userDao = MySQLDAOFactory.getUserDao();
@@ -449,7 +379,6 @@ public class TestUserDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testGetUserById() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -461,29 +390,11 @@ public class TestUserDao {
                     return  con;
                 });
 
-        User expectedUser = new User();
-        WorkType workType = new WorkType();
-        workType.setWorkTypeId(1L);
-        workType.setTypeName("work_type1");
-        expectedUser.setUserId(3L);
-        expectedUser.setLogin("login3");
-        expectedUser.setPassword("passwd3");
-        expectedUser.setRole(new Role());
-        expectedUser.getRole().setRoleId(2L);
-        expectedUser.getRole().setRoleType("role2");
-        expectedUser.setFirstName("first_name3");
-        expectedUser.setLastName("last_name3");
-        Brigade brigade = new Brigade();
-        expectedUser.setBrigade(brigade);
-        expectedUser.getBrigade().setBrigadeId(1L);
-        expectedUser.getBrigade().setBrigadeName("brigade1");
-        expectedUser.getBrigade().setWorkType(workType);
-        expectedUser.setStreet("str3");
-        expectedUser.setPosition("pos1");
-        expectedUser.setHouseNumber("3");
-        expectedUser.setApartment(3L);
-        expectedUser.setCity("city2");
-        expectedUser.setPhoneNumber("093-722-9394");
+        RoleBuilder roleBuilder = RoleBuilder.getBuilder().constructRole(2L);
+        WorkTypeBuilder workTypeBuilder = WorkTypeBuilder.getBuilder().constructWorkType(1L);
+        BrigadeBuilder brigadeBuilder = BrigadeBuilder.getBuilder().constructBrigade(1L, workTypeBuilder);
+
+        User expectedUser = UserBuilder.getBuilder().constructUser(3L, roleBuilder, brigadeBuilder).build();
 
         UserDao userDao = MySQLDAOFactory.getUserDao();
 
@@ -498,7 +409,6 @@ public class TestUserDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testGetUserByLogin() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -510,29 +420,11 @@ public class TestUserDao {
                     return  con;
                 });
 
-        User expectedUser = new User();
-        WorkType workType = new WorkType();
-        workType.setWorkTypeId(1L);
-        workType.setTypeName("work_type1");
-        expectedUser.setUserId(3L);
-        expectedUser.setLogin("login3");
-        expectedUser.setPassword("passwd3");
-        expectedUser.setRole(new Role());
-        expectedUser.getRole().setRoleId(2L);
-        expectedUser.getRole().setRoleType("role2");
-        expectedUser.setFirstName("first_name3");
-        expectedUser.setLastName("last_name3");
-        Brigade brigade = new Brigade();
-        expectedUser.setBrigade(brigade);
-        expectedUser.getBrigade().setBrigadeId(1L);
-        expectedUser.getBrigade().setBrigadeName("brigade1");
-        expectedUser.getBrigade().setWorkType(workType);
-        expectedUser.setStreet("str3");
-        expectedUser.setPosition("pos1");
-        expectedUser.setHouseNumber("3");
-        expectedUser.setApartment(3L);
-        expectedUser.setCity("city2");
-        expectedUser.setPhoneNumber("093-722-9394");
+        RoleBuilder roleBuilder = RoleBuilder.getBuilder().constructRole(2L);
+        WorkTypeBuilder workTypeBuilder = WorkTypeBuilder.getBuilder().constructWorkType(1L);
+        BrigadeBuilder brigadeBuilder = BrigadeBuilder.getBuilder().constructBrigade(1L, workTypeBuilder);
+
+        User expectedUser = UserBuilder.getBuilder().constructUser(3L, roleBuilder, brigadeBuilder).build();
 
         UserDao userDao = MySQLDAOFactory.getUserDao();
 
@@ -547,7 +439,6 @@ public class TestUserDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testUpdateUser() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -559,35 +450,18 @@ public class TestUserDao {
                     return  con;
                 });
 
-        User expectedUser = new User();
-        WorkType workType = new WorkType();
-        workType.setWorkTypeId(1L);
-        workType.setTypeName("work_type1");
-        expectedUser.setUserId(3L);
+        RoleBuilder roleBuilder = RoleBuilder.getBuilder().constructRole(2L);
+        WorkTypeBuilder workTypeBuilder = WorkTypeBuilder.getBuilder().constructWorkType(1L);
+        BrigadeBuilder brigadeBuilder = BrigadeBuilder.getBuilder().constructBrigade(2L, workTypeBuilder);
+
+        User expectedUser = UserBuilder.getBuilder().constructUser(8L, roleBuilder, brigadeBuilder).build();
         expectedUser.setLogin("update");
-        expectedUser.setPassword("passwd3");
-        expectedUser.setRole(new Role());
-        expectedUser.getRole().setRoleId(2L);
-        expectedUser.getRole().setRoleType("role2");
-        expectedUser.setFirstName("first_name3");
-        expectedUser.setLastName("last_name3");
-        Brigade brigade = new Brigade();
-        expectedUser.setBrigade(brigade);
-        expectedUser.getBrigade().setBrigadeId(1L);
-        expectedUser.getBrigade().setBrigadeName("brigade1");
-        expectedUser.getBrigade().setWorkType(workType);
-        expectedUser.setStreet("str3");
-        expectedUser.setPosition("pos1");
-        expectedUser.setHouseNumber("3");
-        expectedUser.setApartment(3L);
-        expectedUser.setCity("city2");
-        expectedUser.setPhoneNumber("093-722-9394");
 
         UserDao userDao = MySQLDAOFactory.getUserDao();
 
         assertTrue(userDao.updateUser(expectedUser));
 
-        User actualUser = userDao.getUserById(3L);
+        User actualUser = userDao.getUserById(8L);
 
         assertEquals(expectedUser, actualUser);
     }
@@ -598,7 +472,6 @@ public class TestUserDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testDeleteUser() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -610,20 +483,10 @@ public class TestUserDao {
                     return  con;
                 });
 
-        User expectedUser = new User();
-        expectedUser.setUserId(7L);
-        expectedUser.setLogin("login7");
-        expectedUser.setPassword("passwd3");
-        expectedUser.setRole(new Role());
-        expectedUser.getRole().setRoleId(2L);
-        expectedUser.getRole().setRoleType("role2");
-        expectedUser.setFirstName("first_name7");
-        expectedUser.setLastName("last_name7");
-        expectedUser.setStreet("str7");
-        expectedUser.setHouseNumber("7");
-        expectedUser.setApartment(7L);
-        expectedUser.setCity("city2");
-        expectedUser.setPhoneNumber("093-722-9394");
+        RoleBuilder roleBuilder = RoleBuilder.getBuilder().constructRole(2L);
+
+        User expectedUser = UserBuilder.getBuilder().constructUser(7L, roleBuilder, null).build();
+
 
         UserDao userDao = MySQLDAOFactory.getUserDao();
 

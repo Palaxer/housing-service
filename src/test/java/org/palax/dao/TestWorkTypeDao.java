@@ -10,6 +10,7 @@ import org.palax.dao.factory.MySQLDAOFactory;
 import org.palax.dao.util.DataGenerator;
 import org.palax.dao.util.InjectingJNDIDataSource;
 import org.palax.dao.util.TestDatabaseManager;
+import org.palax.dao.util.WorkTypeBuilder;
 import org.palax.entity.WorkType;
 import org.palax.utils.DataSourceManager;
 import org.powermock.api.mockito.PowerMockito;
@@ -34,7 +35,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Taras Palashynskyy
  */
-
+@PrepareForTest({DataSourceManager.class})
 @RunWith(PowerMockRunner.class)
 public class TestWorkTypeDao {
 
@@ -47,10 +48,6 @@ public class TestWorkTypeDao {
     /**Mock {@link ResultSet} object for test */
     @Mock
     private ResultSet mockResultSet;
-
-    public TestWorkTypeDao() {
-
-    }
 
     /**
      * Set up method which inject {@link InitialContext} to the test environment
@@ -67,7 +64,6 @@ public class TestWorkTypeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testCorrectInsertWorkType() throws SQLException {
 
@@ -81,8 +77,7 @@ public class TestWorkTypeDao {
 
         WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
 
-        WorkType workType = new WorkType();
-        workType.setTypeName("work type");
+        WorkType workType = DataGenerator.generateWorkType(1);
 
         assertTrue(workTypeDao.insertWorkType(workType));
 
@@ -102,7 +97,6 @@ public class TestWorkTypeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testIncorrectInsertWorkType() throws SQLException {
 
@@ -116,8 +110,8 @@ public class TestWorkTypeDao {
 
         WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
 
-        WorkType workType = new WorkType();
-        workType.setTypeName("work type");
+        WorkType workType = DataGenerator.generateWorkType(1);
+        workType.setWorkTypeId(null);
 
         assertFalse(workTypeDao.insertWorkType(workType));
 
@@ -127,7 +121,7 @@ public class TestWorkTypeDao {
         verify(mockResultSet, times(0)).next();
         verify(mockResultSet, times(0)).getLong(1);
 
-        assertEquals(workType.getWorkTypeId(), null);
+        assertNull(workType.getWorkTypeId());
 
     }
 
@@ -137,7 +131,6 @@ public class TestWorkTypeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testCorrectGetAllWorkType() throws SQLException {
 
@@ -190,7 +183,6 @@ public class TestWorkTypeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testGetWorkTypeByName() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -202,9 +194,7 @@ public class TestWorkTypeDao {
                     return con;
                 });
 
-        WorkType expectedWorkType = new WorkType();
-        expectedWorkType.setWorkTypeId(5L);
-        expectedWorkType.setTypeName("work_type5");
+        WorkType expectedWorkType = WorkTypeBuilder.getBuilder().constructWorkType(5L).build();
 
         WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
 
@@ -219,7 +209,6 @@ public class TestWorkTypeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testGetWorkTypeById() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -231,9 +220,7 @@ public class TestWorkTypeDao {
                     return con;
                 });
 
-        WorkType expectedWorkType = new WorkType();
-        expectedWorkType.setWorkTypeId(5L);
-        expectedWorkType.setTypeName("work_type5");
+        WorkType expectedWorkType = WorkTypeBuilder.getBuilder().constructWorkType(5L).build();
 
         WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
 
@@ -248,7 +235,6 @@ public class TestWorkTypeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testUpdateWorkType() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -260,8 +246,7 @@ public class TestWorkTypeDao {
                     return con;
                 });
 
-        WorkType expectedWorkType = new WorkType();
-        expectedWorkType.setWorkTypeId(4L);
+        WorkType expectedWorkType = WorkTypeBuilder.getBuilder().constructWorkType(4L).build();
         expectedWorkType.setTypeName("update");
 
         WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
@@ -279,7 +264,6 @@ public class TestWorkTypeDao {
      * with utility static method {@code DataSourceManager.getConnection()} because
      * there is no opportunity to use the DI
      */
-    @PrepareForTest({DataSourceManager.class})
     @Test
     public void testDeleteWorkType() {
         PowerMockito.mockStatic(DataSourceManager.class);
@@ -291,14 +275,12 @@ public class TestWorkTypeDao {
                     return con;
                 });
 
-        WorkType expectedWorkType = new WorkType();
-        expectedWorkType.setWorkTypeId(5L);
-        expectedWorkType.setTypeName("work_type5");
+        WorkType expectedWorkType = WorkTypeBuilder.getBuilder().constructWorkType(6L).build();
 
         WorkTypeDao workTypeDao = MySQLDAOFactory.getWorkTypeDao();
 
         assertTrue(workTypeDao.deleteWorkType(expectedWorkType));
 
-        assertNull(workTypeDao.getWorkTypeById(5L));
+        assertNull(workTypeDao.getWorkTypeById(6L));
     }
 }
