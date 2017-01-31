@@ -115,4 +115,5 @@ public class BidService {
     public static boolean leadTimeValid(Timestamp leadTime, Long day) {
         return leadTime.after(Timestamp.valueOf(LocalDateTime.now().plusDays(day)));
     }
+
 }
