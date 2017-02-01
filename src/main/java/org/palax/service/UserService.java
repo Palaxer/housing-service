@@ -54,6 +54,16 @@ public class UserService {
         return MySQLDAOFactory.getUserDao().getAllUser();
     }
 
+    public static List<User> getAllUser(int offSet, int numberOfElement) {
+
+        return MySQLDAOFactory.getUserDao().getAllUser(offSet, numberOfElement);
+    }
+
+    public static Long getAllUserCount() {
+
+        return MySQLDAOFactory.getUserDao().getTableRowSize();
+    }
+
     /**
      * Method return {@link User} which find by {@code id}
      *

@@ -140,6 +140,18 @@
                     </c:forEach>
                     </tbody>
                 </table>
+                <table class="" cellpadding="5" cellspacing="5">
+                    <c:forEach begin="1" end="${pageNumber}" var="i">
+                        <c:choose>
+                            <c:when test="${currentPage == i}">
+                                <td>${i}</td>
+                            </c:when>
+                            <c:otherwise>
+                                <td><a href="/?command=getalluser&page=${i}">${i}</a></td>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+                </table>
             </article>
         </section>
     </div>

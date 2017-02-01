@@ -19,6 +19,10 @@ public interface UserDao {
      */
     List<User> getAllUser();
 
+    List<User> getAllUser(int offSet, int numberOfElement);
+
+    Long getTableRowSize();
+
     /**
      * Method returns {@link List} of {@link User} which find by {@link org.palax.entity.Brigade} {@code id}
      *

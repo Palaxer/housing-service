@@ -74,6 +74,63 @@ public class MySQLUserDao implements UserDao, TransactionUserDao {
         return userList;
     }
 
+    @Override
+    public List<User> getAllUser(int offSet, int numberOfElement) {
+        String SQL = "SELECT A.USER_ID, A.LOGIN, A.PASSWD, A.ROLE_ID, B.ROLE_TYPE, A.FIRST_NAME, " +
+                "A.LAST_NAME, A.POSITION, A.BRIGADE_ID, C.BRIGADE_NAME, C.WORK_TYPE_ID, " +
+                "D.TYPE_NAME, A.STREET, A.HOUSE_NUMBER, A.APARTMENT, A.CITY, A.PHONE_NUMBER " +
+                "FROM user A " +
+                "LEFT JOIN role B ON (A.ROLE_ID=B.ROLE_ID) " +
+                "LEFT JOIN brigade C ON (A.BRIGADE_ID=C.BRIGADE_ID) " +
+                "LEFT JOIN work_type D ON (C.WORK_TYPE_ID=D.WORK_TYPE_ID) " +
+                "LIMIT " + offSet +", " + numberOfElement;
+
+        List<User> userList = null;
+
+
+
+        Connection con = DataSourceManager.getConnection();
+
+        try(Statement stm = con.createStatement();
+            ResultSet rs = stm.executeQuery(SQL)) {
+
+            userList = parseResultSet(rs);
+
+            logger.debug("Get all USER successfully " + userList);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        } finally {
+            DataSourceManager.closeAll(con, null, null);
+        }
+        logger.debug("Try get all USER     " + offSet  +"   " + numberOfElement + "  sizze " + userList.size());
+        return userList;
+    }
+
+    @Override
+    public Long getTableRowSize() {
+        String SQL = "SELECT COUNT(*) FROM user";
+
+
+        Connection con = DataSourceManager.getConnection();
+        Long count = null;
+
+        try(Statement stm = con.createStatement();
+            ResultSet rs = stm.executeQuery(SQL)) {
+
+            while(rs.next()) {
+                count = rs.getLong(1);
+            }
+            logger.debug("Try count all USER" + count);
+
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        } finally {
+            DataSourceManager.closeAll(con, null, null);
+        }
+
+        return count;
+    }
+
     /**
      * {@inheritDoc}
      */
